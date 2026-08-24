@@ -1,242 +1,85 @@
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+const express = require("express");
+const path = require("path");
+require("dotenv").config();
 
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #0b1020;
-    color: white;
-    min-height: 100vh;
-}
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-.app {
-    width: 100%;
-    max-width: 1000px;
-    height: 100vh;
-    margin: auto;
-    display: flex;
-    flex-direction: column;
-    background: #11182b;
-}
+app.use(express.json());
+app.use(express.static(__dirname));
 
-/* TOP BAR */
+app.post("/api/chat", async (req, res) => {
+    try {
+        const message = req.body.message;
 
-.top-bar {
-    height: 75px;
-    padding: 12px 22px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #26304a;
-    background: #151d33;
-}
+        if (!message) {
+            return res.status(400).json({
+                error: "Message is required"
+            });
+        }
 
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
+        const apiKey = process.env.GEMINI_API_KEY;
 
-.logo,
-.welcome-logo,
-.avatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    color: white;
-    background: linear-gradient(135deg, #6c63ff, #00c6ff);
-}
+        if (!apiKey) {
+            return res.status(500).json({
+                error: "GEMINI_API_KEY is not configured"
+            });
+        }
 
-.logo {
-    width: 45px;
-    height: 45px;
-    border-radius: 14px;
-    font-size: 22px;
-}
+        const response = await fetch(
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
+            encodeURIComponent(apiKey),
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    contents: [
+                        {
+                            parts: [
+                                {
+                                    text: message
+                                }
+                            ]
+                        }
+                    ]
+                })
+            }
+        );
 
-.brand h1 {
-    font-size: 19px;
-}
+        const data = await response.json();
 
-.brand p {
-    margin-top: 3px;
-    font-size: 12px;
-    color: #9aa5bd;
-}
+        if (!response.ok) {
+            console.error("Gemini error:", data);
 
-.status {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    color: #aab5ca;
-    font-size: 13px;
-}
+            return res.status(response.status).json({
+                error: data.error?.message || "Gemini request failed"
+            });
+        }
 
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #35d07f;
-}
+        const reply =
+            data.candidates?.[0]?.content?.parts?.[0]?.text;
 
-/* CHAT */
+        if (!reply) {
+            return res.status(500).json({
+                error: "Gemini returned no response"
+            });
+        }
 
-.chat {
-    flex: 1;
-    overflow-y: auto;
-    padding: 35px 25px;
-}
+        res.json({
+            reply: reply
+        });
 
-.welcome {
-    text-align: center;
-    max-width: 500px;
-    margin: 30px auto 45px;
-}
+    } catch (error) {
+        console.error("Server error:", error);
 
-.welcome-logo {
-    width: 70px;
-    height: 70px;
-    border-radius: 22px;
-    margin: auto;
-    font-size: 32px;
-    box-shadow: 0 10px 35px rgba(0, 198, 255, 0.18);
-}
-
-.welcome h2 {
-    margin-top: 18px;
-    font-size: 27px;
-}
-
-.welcome p {
-    margin-top: 10px;
-    color: #9da8bf;
-    line-height: 1.6;
-}
-
-/* MESSAGES */
-
-.message {
-    display: flex;
-    gap: 12px;
-    max-width: 750px;
-    margin: 20px auto;
-}
-
-.avatar {
-    flex-shrink: 0;
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
-}
-
-.message-content {
-    background: #1a233b;
-    border: 1px solid #293551;
-    border-radius: 5px 16px 16px 16px;
-    padding: 13px 16px;
-    line-height: 1.6;
-}
-
-.message-content strong {
-    display: block;
-    margin-bottom: 5px;
-    color: #dce4ff;
-    font-size: 14px;
-}
-
-.message-content p {
-    color: #c5cee0;
-    font-size: 15px;
-}
-
-/* INPUT */
-
-.input-area {
-    display: flex;
-    gap: 10px;
-    padding: 16px 20px;
-    border-top: 1px solid #26304a;
-    background: #151d33;
-}
-
-#messageInput {
-    flex: 1;
-    border: 1px solid #303b59;
-    outline: none;
-    border-radius: 15px;
-    padding: 15px 17px;
-    background: #0e1527;
-    color: white;
-    font-size: 15px;
-}
-
-#messageInput::placeholder {
-    color: #727e98;
-}
-
-#messageInput:focus {
-    border-color: #6c63ff;
-}
-
-#sendButton {
-    width: 52px;
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-    color: white;
-    font-size: 22px;
-    background: linear-gradient(135deg, #6c63ff, #00aeea);
-    transition: 0.2s;
-}
-
-#sendButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 7px 20px rgba(0, 174, 234, 0.25);
-}
-
-#sendButton:active {
-    transform: scale(0.96);
-}
-
-/* FOOTER */
-
-.footer {
-    text-align: center;
-    padding: 7px 10px 10px;
-    background: #151d33;
-    color: #68748d;
-    font-size: 10px;
-}
-
-/* MOBILE */
-
-@media (max-width: 600px) {
-
-    .top-bar {
-        padding: 10px 15px;
+        res.status(500).json({
+            error: "AI request failed"
+        });
     }
+});
 
-    .status {
-        display: none;
-    }
-
-    .chat {
-        padding: 25px 15px;
-    }
-
-    .welcome h2 {
-        font-size: 23px;
-    }
-
-    .message {
-        max-width: 100%;
-    }
-
-    .input-area {
-        padding: 12px;
-    }
-
-}
+app.listen(PORT, () => {
+    console.log(`Rashidson AI is running on port ${PORT}`);
+});
