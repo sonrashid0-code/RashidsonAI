@@ -1,38 +1,92 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-   <title>Rashidson AI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Rashidson AI</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="app">
+    <div class="app">
 
-    <header>
-           </header>
-Rashidson AI
-    <main id="chat">
-        <div class="message ai">
-            Hello! 👋 I'm Rashidson AI.
+        <!-- TOP BAR -->
+        <header class="top-bar">
+
+            <div class="brand">
+                <div class="logo">R</div>
+
+                <div>
+                    <h1>Rashidson AI</h1>
+                    <p>Smart AI Assistant</p>
+                </div>
+            </div>
+
+            <div class="status">
+                <span class="status-dot"></span>
+                Online
+            </div>
+
+        </header>
+
+
+        <!-- CHAT AREA -->
+        <main id="chat" class="chat">
+
+            <div class="welcome">
+
+                <div class="welcome-logo">R</div>
+
+                <h2>Welcome to Rashidson AI</h2>
+
+                <p>
+                    Your intelligent AI assistant.
+                    Ask me anything and let's get started.
+                </p>
+
+            </div>
+
+            <div class="message ai">
+                <div class="avatar">R</div>
+
+                <div class="message-content">
+                    <strong>Rashidson AI</strong>
+                    <p>Hello! 👋 I'm Rashidson AI. How can I help you today?</p>
+                </div>
+            </div>
+
+        </main>
+
+
+        <!-- INPUT AREA -->
+        <div class="input-area">
+
+            <input
+                id="messageInput"
+                type="text"
+                placeholder="Message Rashidson AI..."
+                autocomplete="off"
+            >
+
+            <button id="sendButton">
+                <span>➤</span>
+            </button>
+
         </div>
-    </main>
 
-    <div class="input-area">
-        <input
-            id="messageInput"
-            type="text"
-            placeholder="Type your message..."
-        />
 
-        <button id="sendButton">Send</button>
+        <!-- FOOTER -->
+        <div class="footer">
+            Rashidson AI can make mistakes. Check important information.
+        </div>
+
     </div>
 
-</div>
 
-<script src="script.js"></script>
+    <script src="script.js"></script>
 
 </body>
 </html>
