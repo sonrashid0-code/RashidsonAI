@@ -1,20 +1,13 @@
 const express = require("express");
-const OpenAI = require("openai");
 require("dotenv").config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
+
 app.use(express.json());
 app.use(express.static(__dirname));
 
-const client = new OpenAI({
-    apiKey: process.env.GEMINI_API_KEY,
-    baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/"
-});
-
 app.post("/api/chat", async (req, res) => {
-    console.log("CHAT REQUEST RECEIVED:", req.body);
-
     try {
         const message = req.body.message;
 
@@ -24,32 +17,68 @@ app.post("/api/chat", async (req, res) => {
             });
         }
 
-        const response = await client.chat.completions.create({
-            model: "gemini-3.6-flash",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are Luseed Assistant, a helpful school AI assistant."
+        const apiKey = process.env.GEMINI_API_KEY;
+
+        if (!apiKey) {
+            return res.status(500).json({
+                error: "GEMINI_API_KEY is not configured"
+            });
+        }
+
+        const response = await fetch(
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
+            encodeURIComponent(apiKey),
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
                 },
-                {
-                    role: "user",
-                    content: message
-                }
-            ]
-        });
+                body: JSON.stringify({
+                    contents: [
+                        {
+                            parts: [
+                                {
+                                    text: message
+                                }
+                            ]
+                        }
+                    ]
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error("Gemini error:", data);
+
+            return res.status(response.status).json({
+                error: data.error?.message || "Gemini request failed"
+            });
+        }
+
+        const reply =
+            data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!reply) {
+            return res.status(500).json({
+                error: "Gemini returned no response"
+            });
+        }
 
         res.json({
-            reply: response.choices[0].message.content
+            reply: reply
         });
 
     } catch (error) {
-        console.error("AI ERROR:", error);
+        console.error("Server error:", error);
 
         res.status(500).json({
             error: "AI request failed"
         });
     }
 });
-app.listen(port, "0.0.0.0", () => {
-    console.log(`Luseed Assistant is running at http://localhost:${port}`);
+
+app.listen(PORT, () => {
+    console.log(`Rashidson AI is running on port ${PORT}`);
 });
