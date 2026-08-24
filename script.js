@@ -1,4 +1,4 @@
-﻿const messageInput = document.getElementById("messageInput");
+const messageInput = document.getElementById("messageInput");
 const sendButton = document.getElementById("sendButton");
 const chat = document.getElementById("chat");
 
@@ -12,7 +12,7 @@ async function sendMessage() {
     messageInput.value = "";
     sendButton.disabled = true;
 
-    const thinking = addMessage(
+    const thinkingMessage = addMessage(
         "Rashidson AI",
         "Thinking...",
         "ai"
@@ -31,7 +31,7 @@ async function sendMessage() {
 
         const data = await response.json();
 
-        thinking.remove();
+        thinkingMessage.remove();
 
         if (!response.ok) {
             throw new Error(data.error || "AI request failed");
@@ -39,20 +39,21 @@ async function sendMessage() {
 
         addMessage(
             "Rashidson AI",
-            data.reply || "I couldn't generate a reply.",
+            data.reply || "I couldn't generate a response.",
             "ai"
         );
 
     } catch (error) {
-        thinking.remove();
+
+        console.error("RSai error:", error);
+
+        thinkingMessage.remove();
 
         addMessage(
             "Rashidson AI",
-            "Sorry, something went wrong. Please try again.",
+            "Sorry, I couldn't connect right now. Please try again.",
             "ai"
         );
-
-        console.error(error);
 
     } finally {
         sendButton.disabled = false;
@@ -60,14 +61,15 @@ async function sendMessage() {
     }
 }
 
+
 function addMessage(sender, text, type) {
 
     const message = document.createElement("div");
-    message.className = "message " + type;
+    message.className = `message ${type}`;
 
     const avatar = document.createElement("div");
     avatar.className = "avatar";
-    avatar.textContent = type === "ai" ? "R" : "You";
+    avatar.textContent = type === "ai" ? "RS" : "You";
 
     const content = document.createElement("div");
     content.className = "message-content";
@@ -91,22 +93,41 @@ function addMessage(sender, text, type) {
     return message;
 }
 
+
+/* SEND BUTTON */
+
 sendButton.addEventListener("click", sendMessage);
 
+
+/* ENTER KEY */
+
 messageInput.addEventListener("keydown", function(event) {
+
     if (event.key === "Enter") {
         event.preventDefault();
         sendMessage();
     }
+
 });
+
+
+/* PWA SERVICE WORKER */
+
 if ("serviceWorker" in navigator) {
+
     window.addEventListener("load", () => {
+
         navigator.serviceWorker.register("/service-worker.js")
             .then(() => {
                 console.log("RSai service worker registered");
             })
             .catch(error => {
-                console.error("Service worker registration failed:", error);
+                console.error(
+                    "RSai service worker registration failed:",
+                    error
+                );
             });
+
     });
-}
+
+}﻿
