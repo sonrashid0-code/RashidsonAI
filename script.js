@@ -1,21 +1,24 @@
-﻿const input = document.getElementById("messageInput");
-const button = document.getElementById("sendButton");
+﻿const messageInput = document.getElementById("messageInput");
+const sendButton = document.getElementById("sendButton");
 const chat = document.getElementById("chat");
 
-function addMessage(text, type) {
-    const message = document.createElement("div");
-    message.className = "message " + type;
-    message.textContent = text;
-    chat.appendChild(message);
-}
-
 async function sendMessage() {
-    const text = input.value.trim();
+    const message = messageInput.value.trim();
 
-    if (!text) return;
+    if (!message) return;
 
-    addMessage(text, "user");
-    input.value = "";
+    // Show user's message
+    addMessage("You", message, "user");
+
+    messageInput.value = "";
+    sendButton.disabled = true;
+
+    // Thinking message
+    const thinking = addMessage(
+        "Rashidson AI",
+        "Thinking...",
+        "ai"
+    );
 
     try {
         const response = await fetch("/api/chat", {
@@ -23,27 +26,87 @@ async function sendMessage() {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ message: text })
+            body: JSON.stringify({
+                message: message
+            })
         });
 
         const data = await response.json();
 
-        if (data.reply) {
-            addMessage(data.reply, "ai");
-        } else {
-            addMessage("Server error: " + (data.error || "No reply"), "ai");
+        thinking.remove();
+
+        if (!response.ok) {
+            throw new Error(data.error || "AI request failed");
         }
 
+        addMessage(
+            "Rashidson AI",
+            data.reply || data.output || "I couldn't generate a reply.",
+            "ai"
+        );
+
     } catch (error) {
+        thinking.remove();
+
+        addMessage(
+            "Rashidson AI",
+            "Sorry, something went wrong. Please try again.",
+            "ai"
+        );
+
         console.error(error);
-        addMessage("❌ Connection error.", "ai");
+
+    } finally {
+        sendButton.disabled = false;
+        messageInput.focus();
     }
 }
 
-button.addEventListener("click", sendMessage);
 
-input.addEventListener("keydown", function(event) {
+function addMessage(sender, text, type) {
+
+    const message = document.createElement("div");
+    message.className = "message " + type;
+
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+
+    avatar.textContent =
+        type === "ai" ? "R" : "You";
+
+    const content = document.createElement("div");
+    content.className = "message-content";
+
+    const name = document.createElement("strong");
+    name.textContent = sender;
+
+    const paragraph = document.createElement("p");
+    paragraph.textContent = text;
+
+    content.appendChild(name);
+    content.appendChild(paragraph);
+
+    message.appendChild(avatar);
+    message.appendChild(content);
+
+    chat.appendChild(message);
+
+    chat.scrollTop = chat.scrollHeight;
+
+    return message;
+}
+
+
+// Send button
+sendButton.addEventListener("click", sendMessage);
+
+
+// Press Enter to send
+messageInput.addEventListener("keydown", function(event) {
+
     if (event.key === "Enter") {
+        event.preventDefault();
         sendMessage();
     }
+
 });
