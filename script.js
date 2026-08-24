@@ -99,3 +99,14 @@ messageInput.addEventListener("keydown", function(event) {
         sendMessage();
     }
 });
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/service-worker.js")
+            .then(() => {
+                console.log("RSai service worker registered");
+            })
+            .catch(error => {
+                console.error("Service worker registration failed:", error);
+            });
+    });
+}
