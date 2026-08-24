@@ -1,55 +1,242 @@
-const express = require("express");
-const OpenAI = require("openai");
-require("dotenv").config();
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-const app = express();
-const port = process.env.PORT || 3000;
-app.use(express.json());
-app.use(express.static(__dirname));
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #0b1020;
+    color: white;
+    min-height: 100vh;
+}
 
-const client = new OpenAI({
-    apiKey: process.env.GEMINI_API_KEY,
-    baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/"
-});
+.app {
+    width: 100%;
+    max-width: 1000px;
+    height: 100vh;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    background: #11182b;
+}
 
-app.post("/api/chat", async (req, res) => {
-    console.log("CHAT REQUEST RECEIVED:", req.body);
+/* TOP BAR */
 
-    try {
-        const message = req.body.message;
+.top-bar {
+    height: 75px;
+    padding: 12px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #26304a;
+    background: #151d33;
+}
 
-        if (!message) {
-            return res.status(400).json({
-                error: "Message is required"
-            });
-        }
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
-        const response = await client.chat.completions.create({
-            model: "gemini-3.6-flash",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are Luseed Assistant, a helpful school AI assistant."
-                },
-                {
-                    role: "user",
-                    content: message
-                }
-            ]
-        });
+.logo,
+.welcome-logo,
+.avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(135deg, #6c63ff, #00c6ff);
+}
 
-        res.json({
-            reply: response.choices[0].message.content
-        });
+.logo {
+    width: 45px;
+    height: 45px;
+    border-radius: 14px;
+    font-size: 22px;
+}
 
-    } catch (error) {
-        console.error("AI ERROR:", error);
+.brand h1 {
+    font-size: 19px;
+}
 
-        res.status(500).json({
-            error: "AI request failed"
-        });
+.brand p {
+    margin-top: 3px;
+    font-size: 12px;
+    color: #9aa5bd;
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #aab5ca;
+    font-size: 13px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #35d07f;
+}
+
+/* CHAT */
+
+.chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 35px 25px;
+}
+
+.welcome {
+    text-align: center;
+    max-width: 500px;
+    margin: 30px auto 45px;
+}
+
+.welcome-logo {
+    width: 70px;
+    height: 70px;
+    border-radius: 22px;
+    margin: auto;
+    font-size: 32px;
+    box-shadow: 0 10px 35px rgba(0, 198, 255, 0.18);
+}
+
+.welcome h2 {
+    margin-top: 18px;
+    font-size: 27px;
+}
+
+.welcome p {
+    margin-top: 10px;
+    color: #9da8bf;
+    line-height: 1.6;
+}
+
+/* MESSAGES */
+
+.message {
+    display: flex;
+    gap: 12px;
+    max-width: 750px;
+    margin: 20px auto;
+}
+
+.avatar {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+}
+
+.message-content {
+    background: #1a233b;
+    border: 1px solid #293551;
+    border-radius: 5px 16px 16px 16px;
+    padding: 13px 16px;
+    line-height: 1.6;
+}
+
+.message-content strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #dce4ff;
+    font-size: 14px;
+}
+
+.message-content p {
+    color: #c5cee0;
+    font-size: 15px;
+}
+
+/* INPUT */
+
+.input-area {
+    display: flex;
+    gap: 10px;
+    padding: 16px 20px;
+    border-top: 1px solid #26304a;
+    background: #151d33;
+}
+
+#messageInput {
+    flex: 1;
+    border: 1px solid #303b59;
+    outline: none;
+    border-radius: 15px;
+    padding: 15px 17px;
+    background: #0e1527;
+    color: white;
+    font-size: 15px;
+}
+
+#messageInput::placeholder {
+    color: #727e98;
+}
+
+#messageInput:focus {
+    border-color: #6c63ff;
+}
+
+#sendButton {
+    width: 52px;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    color: white;
+    font-size: 22px;
+    background: linear-gradient(135deg, #6c63ff, #00aeea);
+    transition: 0.2s;
+}
+
+#sendButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 20px rgba(0, 174, 234, 0.25);
+}
+
+#sendButton:active {
+    transform: scale(0.96);
+}
+
+/* FOOTER */
+
+.footer {
+    text-align: center;
+    padding: 7px 10px 10px;
+    background: #151d33;
+    color: #68748d;
+    font-size: 10px;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .top-bar {
+        padding: 10px 15px;
     }
-});
-app.listen(port, "0.0.0.0", () => {
-    console.log(`Luseed Assistant is running at http://localhost:${port}`);
-});
+
+    .status {
+        display: none;
+    }
+
+    .chat {
+        padding: 25px 15px;
+    }
+
+    .welcome h2 {
+        font-size: 23px;
+    }
+
+    .message {
+        max-width: 100%;
+    }
+
+    .input-area {
+        padding: 12px;
+    }
+
+}
