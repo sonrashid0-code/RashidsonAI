@@ -6,106 +6,119 @@
 
     <title>Rashidson AI</title>
 
-    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="icon" type="image/png" href="/icon.png">
     <link rel="manifest" href="manifest.json">
-
     <meta name="theme-color" content="#151d33">
-
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <div class="app">
+<div class="app">
 
-        <header class="top-bar">
+    <header class="top-bar">
 
-            <div class="brand">
+        <div class="brand">
 
-                <div class="logo">
-                    <img src="icon.png" alt="Rashidson AI">
-                </div>
-
-                <div>
-                    <h1>Rashidson AI</h1>
-                    <p>Smart AI Assistant</p>
-                </div>
-
+            <div class="logo">
+                <img src="/icon.png" alt="RSai">
             </div>
 
-            <div class="status">
-                <span class="status-dot"></span>
-                Online
+            <div>
+                <h1>Rashidson AI</h1>
+                <p>Smart AI Assistant</p>
             </div>
 
-        </header>
+        </div>
 
-        <main id="chat" class="chat">
+        <div class="status">
+            <span class="status-dot"></span>
+            Online
+        </div>
 
-            <div class="welcome">
+    </header>
 
-                <div class="welcome-logo">
-                    <img src="icon.png" alt="Rashidson AI">
-                </div>
 
-                <h2>Welcome to Rashidson AI</h2>
+    <main id="chat" class="chat">
+
+        <div class="welcome">
+
+            <div class="welcome-logo">
+                <img src="/icon.png" alt="RSai">
+            </div>
+
+            <h2>Welcome to Rashidson AI</h2>
+
+            <p>
+                Your intelligent AI assistant.
+                Ask me anything and let's get started.
+            </p>
+
+        </div>
+
+
+        <div class="message ai">
+
+            <div class="avatar">
+                <img src="/icon.png" alt="RSai">
+            </div>
+
+            <div class="message-content">
+
+                <strong>Rashidson AI</strong>
 
                 <p>
-                    Your intelligent AI assistant.
-                    Ask me anything and let's get started.
+                    Hello! 👋 I'm Rashidson AI.
+                    How can I help you today?
                 </p>
 
             </div>
 
-            <div class="message ai">
-
-                <div class="avatar">
-                    <img src="icon.png" alt="Rashidson AI">
-                </div>
-
-                <div class="message-content">
-
-                    <strong>Rashidson AI</strong>
-
-                    <p>
-                        Hello! 👋 I'm Rashidson AI.
-                        How can I help you today?
-                    </p>
-
-                </div>
-
-            </div>
-
-        </main>
-
-        <div class="input-area">
-
-            <input
-                id="messageInput"
-                type="text"
-                placeholder="Message Rashidson AI..."
-                autocomplete="off"
-            >
-
-            <button id="sendButton" type="button">
-                ➤
-            </button>
-
         </div>
 
-        <div class="footer">
-            Rashidson AI can make mistakes. Check important information.
-        </div>
+    </main>
+
+
+    <div class="input-area">
+
+        <input
+            id="messageInput"
+            type="text"
+            placeholder="Message Rashidson AI..."
+            autocomplete="off"
+        >
+
+        <button id="sendButton">➤</button>
 
     </div>
 
-    <script src="script.js"></script>
 
-    <script>
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("service-worker.js");
-        }
-    </script>
+    <div class="footer">
+        Rashidson AI can make mistakes. Check important information.
+    </div>
+
+</div>
+
+
+<script src="script.js"></script><script src="script.js"></script>
+
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/service-worker.js")
+            .then(() => {
+                console.log("Rashidson AI service worker registered");
+            })
+            .catch(error => {
+                console.error("Service worker registration failed:", error);
+            });
+    });
+}
+</script>
+
+</body>
+</html>
+
 
 </body>
 </html>
