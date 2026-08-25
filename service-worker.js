@@ -1,26 +1,25 @@
-const CACHE_NAME = "rsai-v1";
+const CACHE_NAME = "rashidson-ai-v1";
 
-const FILES_TO_CACHE = [
+const FILES = [
     "/",
     "/index.html",
     "/style.css",
     "/script.js",
-    "/manifest.json",
-    "/icon-192.png",
-    "/icon-512.png"
+    "/icon.png"
 ];
 
 self.addEventListener("install", event => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(FILES_TO_CACHE))
+        caches.open(CACHE_NAME).then(cache => {
+            return cache.addAll(FILES);
+        })
     );
 });
 
 self.addEventListener("fetch", event => {
     event.respondWith(
-        fetch(event.request).catch(() => {
-            return caches.match(event.request);
+        caches.match(event.request).then(cached => {
+            return cached || fetch(event.request);
         })
     );
 });
