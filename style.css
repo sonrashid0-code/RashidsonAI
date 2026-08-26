@@ -183,7 +183,7 @@ body {
 }
 
 .welcome p {
-    max-width: 55px;
+    max-width: 500px;
     margin: auto;
     color: var(--muted);
     line-height: 1.6;
