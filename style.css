@@ -159,8 +159,8 @@ body {
 }
 
 .welcome-logo {
-    width: 55px;
-    height: 55px;
+    width: 88px;
+    height: 88px;
     margin: 0 auto 20px;
     padding: 5px;
     border-radius: 27px;
@@ -171,8 +171,8 @@ body {
 }
 
 .welcome-logo img {
-    width: 55%;
-    height: 55%;
+    width: 100%;
+    height: 100%;
     border-radius: 22px;
     object-fit: cover;
 }
@@ -183,7 +183,7 @@ body {
 }
 
 .welcome p {
-    max-width: 500px;
+    max-width: 55px;
     margin: auto;
     color: var(--muted);
     line-height: 1.6;
