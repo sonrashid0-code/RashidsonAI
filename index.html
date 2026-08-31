@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -8,30 +8,579 @@
     <title>Rashidson AI</title>
 
     <link rel="icon" type="image/png" href="/icon.png">
-    <link rel="manifest" href="/manifest.json">
-
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#050816">
 
-    <link rel="stylesheet" href="style.css?v=200">
+    <link rel="stylesheet" href="style.css?v=100">
+
+    <style>
+        /* =========================
+           TOP LOGO
+        ========================= */
+
+        .logo {
+            width: 38px !important;
+            height: 38px !important;
+            min-width: 38px !important;
+            min-height: 38px !important;
+            max-width: 38px !important;
+            max-height: 38px !important;
+            border-radius: 10px !important;
+            overflow: hidden !important;
+        }
+
+        .logo img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+        }
+
+        .top-bar {
+            height: 60px !important;
+            min-height: 60px !important;
+        }
+
+
+        /* =========================
+           VOICE CALL SCREEN
+        ========================= */
+
+        #voiceScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+
+            display: none;
+            flex-direction: column;
+
+            background:
+                radial-gradient(
+                    circle at center,
+                    #101a42 0%,
+                    #070b1d 38%,
+                    #02030a 75%,
+                    #000000 100%
+                );
+
+            color: white;
+            overflow: hidden;
+        }
+
+        #voiceScreen.active {
+            display: flex;
+        }
+
+
+        /* =========================
+           VOICE TOP BAR
+        ========================= */
+
+        .voice-top {
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 25px;
+            flex-shrink: 0;
+        }
+
+        .voice-title {
+            text-align: center;
+            flex: 1;
+        }
+
+        .voice-title h2 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+
+        .voice-title p {
+            margin: 6px 0 0;
+            font-size: 13px;
+            opacity: 0.65;
+        }
+
+        .voice-control {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+
+            border: 1px solid rgba(255,255,255,0.15);
+
+            background: rgba(255,255,255,0.07);
+
+            color: white;
+            font-size: 23px;
+
+            cursor: pointer;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            backdrop-filter: blur(10px);
+        }
+
+
+        /* =========================
+           CENTER
+        ========================= */
+
+        .voice-center {
+            flex: 1;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            min-height: 0;
+        }
+
+
+        /* =========================
+           LIVE LOGO
+        ========================= */
+
+        .voice-orb {
+            width: min(58vw, 330px);
+            height: min(58vw, 330px);
+
+            position: relative;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        .voice-ring {
+            position: absolute;
+            inset: -20px;
+
+            border-radius: 50%;
+
+            background:
+                conic-gradient(
+                    #6c5cff,
+                    #18c8ff,
+                    #7b5cff,
+                    #19d7ff,
+                    #6c5cff
+                );
+
+            filter: blur(2px);
+
+            animation:
+                rotateRing 6s linear infinite,
+                pulseRing 2s ease-in-out infinite;
+
+            opacity: 0.9;
+        }
+
+
+        .voice-ring::before {
+            content: "";
+
+            position: absolute;
+            inset: 5px;
+
+            border-radius: 50%;
+
+            background: #050816;
+        }
+
+
+        .voice-ring-2 {
+            position: absolute;
+            inset: -55px;
+
+            border-radius: 50%;
+
+            border: 1px solid rgba(83, 126, 255, 0.25);
+
+            animation:
+                pulseOuter 2.8s ease-in-out infinite;
+        }
+
+
+        .voice-ring-3 {
+            position: absolute;
+            inset: -85px;
+
+            border-radius: 50%;
+
+            border: 1px solid rgba(122, 80, 255, 0.12);
+
+            animation:
+                pulseOuter 3.5s ease-in-out infinite reverse;
+        }
+
+
+        /* =========================
+           REAL RASHIDSON ICON
+        ========================= */
+
+        .voice-logo {
+            position: relative;
+            z-index: 5;
+
+            width: 210px;
+            height: 210px;
+
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background:
+                radial-gradient(
+                    circle,
+                    #101a35,
+                    #030610
+                );
+
+            border: 2px solid rgba(93, 148, 255, 0.8);
+
+            box-shadow:
+                0 0 25px rgba(55, 115, 255, 0.7),
+                0 0 70px rgba(105, 70, 255, 0.35),
+                inset 0 0 35px rgba(60, 120, 255, 0.15);
+
+            animation:
+                logoBreathing 2.2s ease-in-out infinite;
+        }
+
+
+        .voice-logo img {
+            width: 75%;
+            height: 75%;
+
+            object-fit: contain;
+
+            filter:
+                drop-shadow(0 0 15px rgba(67, 145, 255, 0.9));
+        }
+
+
+        /* =========================
+           STATUS
+        ========================= */
+
+        .voice-status {
+            margin-top: 70px;
+
+            text-align: center;
+        }
+
+        .voice-status h3 {
+            margin: 0;
+
+            font-size: 28px;
+            font-weight: 500;
+        }
+
+        .voice-status p {
+            margin-top: 12px;
+
+            font-size: 15px;
+            opacity: 0.55;
+        }
+
+
+        /* =========================
+           AUDIO BARS
+        ========================= */
+
+        .voice-bars {
+            height: 35px;
+
+            margin-top: 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            gap: 5px;
+        }
+
+        .voice-bars span {
+            width: 5px;
+            height: 10px;
+
+            border-radius: 10px;
+
+            background: linear-gradient(
+                #28c9ff,
+                #7c5cff
+            );
+
+            box-shadow:
+                0 0 10px rgba(71, 143, 255, 0.8);
+
+            animation: audioBar 1s ease-in-out infinite;
+        }
+
+        .voice-bars span:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .voice-bars span:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .voice-bars span:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        .voice-bars span:nth-child(5) {
+            animation-delay: 0.4s;
+        }
+
+        .voice-bars span:nth-child(6) {
+            animation-delay: 0.3s;
+        }
+
+        .voice-bars span:nth-child(7) {
+            animation-delay: 0.2s;
+        }
+
+
+        /* =========================
+           BOTTOM CONTROLS
+        ========================= */
+
+        .voice-bottom {
+            padding: 20px 25px 35px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            gap: 20px;
+            flex-shrink: 0;
+        }
+
+
+        .voice-input-button {
+            height: 65px;
+            min-width: 210px;
+
+            padding: 0 25px;
+
+            border-radius: 35px;
+
+            border: 1px solid rgba(255,255,255,0.12);
+
+            background:
+                rgba(20, 27, 55, 0.85);
+
+            color: white;
+
+            font-size: 16px;
+
+            display: flex;
+            align-items: center;
+            gap: 15px;
+
+            cursor: pointer;
+
+            backdrop-filter: blur(12px);
+        }
+
+
+        .voice-mic {
+            width: 76px;
+            height: 76px;
+
+            border-radius: 50%;
+
+            border: 2px solid #27c8ff;
+
+            background:
+                radial-gradient(
+                    circle,
+                    #17274b,
+                    #050916
+                );
+
+            color: white;
+
+            font-size: 34px;
+
+            cursor: pointer;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            box-shadow:
+                0 0 20px rgba(35, 199, 255, 0.7),
+                0 0 45px rgba(76, 80, 255, 0.25);
+
+            animation:
+                micPulse 2s ease-in-out infinite;
+        }
+
+
+        .voice-end {
+            width: 68px;
+            height: 68px;
+
+            border-radius: 50%;
+
+            border: 2px solid #ff3154;
+
+            background:
+                radial-gradient(
+                    circle,
+                    #65152a,
+                    #21050d
+                );
+
+            color: white;
+
+            font-size: 30px;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 0 20px rgba(255, 40, 75, 0.5);
+        }
+
+
+        /* =========================
+           ANIMATIONS
+        ========================= */
+
+        @keyframes rotateRing {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulseRing {
+            0%, 100% {
+                transform: scale(0.97);
+            }
+
+            50% {
+                transform: scale(1.04);
+            }
+        }
+
+        @keyframes pulseOuter {
+            0%, 100% {
+                transform: scale(0.94);
+                opacity: 0.3;
+            }
+
+            50% {
+                transform: scale(1.08);
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes logoBreathing {
+            0%, 100% {
+                transform: scale(0.97);
+            }
+
+            50% {
+                transform: scale(1.04);
+            }
+        }
+
+        @keyframes micPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.07);
+            }
+        }
+
+        @keyframes audioBar {
+            0%, 100% {
+                height: 8px;
+            }
+
+            50% {
+                height: 30px;
+            }
+        }
+
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 600px) {
+
+            .voice-logo {
+                width: 170px;
+                height: 170px;
+            }
+
+            .voice-orb {
+                width: 230px;
+                height: 230px;
+            }
+
+            .voice-status {
+                margin-top: 55px;
+            }
+
+            .voice-status h3 {
+                font-size: 25px;
+            }
+
+            .voice-input-button {
+                min-width: 0;
+                width: 170px;
+                font-size: 14px;
+            }
+
+            .voice-mic {
+                width: 68px;
+                height: 68px;
+            }
+
+            .voice-end {
+                width: 62px;
+                height: 62px;
+            }
+        }
+    </style>
+
 </head>
+
 
 <body>
 
 <div class="app">
 
-    <!-- =================================================
+
+    <!-- =========================
          NORMAL CHAT
-    ================================================== -->
+    ========================= -->
 
     <header class="top-bar">
 
         <div class="brand">
 
             <div class="logo">
-                <img src="/icon.png" alt="Rashidson AI">
+                <img src="icon.png" alt="RSai">
             </div>
 
-            <div class="brand-text">
+            <div>
                 <h1>Rashidson AI</h1>
                 <p>Smart AI Assistant</p>
             </div>
@@ -46,26 +595,15 @@
     </header>
 
 
-    <!-- =================================================
-         CHAT
-    ================================================== -->
-
     <main id="chat" class="chat">
 
         <div class="welcome">
 
             <div class="welcome-logo">
-
-                <img
-                    src="/icon.png"
-                    alt="Rashidson AI"
-                >
-
+                <img src="/icon.png" alt="RSai">
             </div>
 
-            <h2>
-                Welcome to Rashidson AI
-            </h2>
+            <h2>Welcome to Rashidson AI</h2>
 
             <p>
                 Your intelligent AI assistant.
@@ -78,19 +616,12 @@
         <div class="message ai">
 
             <div class="avatar">
-
-                <img
-                    src="/icon.png"
-                    alt="Rashidson AI"
-                >
-
+                <img src="/icon.png" alt="RSai">
             </div>
 
             <div class="message-content">
 
-                <strong>
-                    Rashidson AI
-                </strong>
+                <strong>Rashidson AI</strong>
 
                 <p>
                     Hello! 👋 I'm Rashidson AI.
@@ -104,9 +635,9 @@
     </main>
 
 
-    <!-- =================================================
-         CHAT INPUT
-    ================================================== -->
+    <!-- =========================
+         NORMAL INPUT
+    ========================= -->
 
     <div class="input-area">
 
@@ -117,29 +648,26 @@
             autocomplete="off"
         >
 
-
         <button
             id="micButton"
             type="button"
-            title="Speak"
+            title="Speak to Rashidson AI"
         >
             🎤
         </button>
 
-
         <button
             id="callButton"
             type="button"
-            title="Voice conversation"
+            title="Start voice conversation"
         >
             📞
         </button>
 
-
         <button
             id="sendButton"
             type="button"
-            title="Send"
+            title="Send message"
         >
             ➤
         </button>
@@ -148,31 +676,25 @@
 
 
     <div class="footer">
-
-        Rashidson AI can make mistakes.
-        Check important information.
-
+        Rashidson AI can make mistakes. Check important information.
     </div>
 
 </div>
 
 
-
-<!-- =====================================================
-     RASHIDSON AI LIVE VOICE SCREEN
-====================================================== -->
+<!-- =========================
+     FULL SCREEN VOICE MODE
+========================= -->
 
 <div id="voiceScreen">
 
 
-    <!-- =================================================
-         TOP
-    ================================================== -->
+    <!-- TOP -->
 
-    <div class="live-top">
+    <div class="voice-top">
 
         <button
-            class="live-button"
+            class="voice-control"
             id="voiceMenuButton"
             type="button"
         >
@@ -180,19 +702,17 @@
         </button>
 
 
-        <div class="live-brand">
+        <div class="voice-title">
 
-            <h2>
-                RASHIDSON <span>AI</span>
-            </h2>
+            <h2>RASHIDSON AI</h2>
 
-            <div></div>
+            <p>Voice Conversation</p>
 
         </div>
 
 
         <button
-            class="live-button"
+            class="voice-control"
             id="voiceSettingsButton"
             type="button"
         >
@@ -202,199 +722,135 @@
     </div>
 
 
+    <!-- CENTER -->
 
-    <!-- =================================================
-         LISTENING STATUS
-    ================================================== -->
+    <div class="voice-center">
 
-    <div class="live-state">
 
-        <div class="live-state-title">
+        <div class="voice-orb">
 
-            <span class="live-dot"></span>
+            <div class="voice-ring"></div>
 
-            <strong id="voiceStatus">
-                Listening...
-            </strong>
+            <div class="voice-ring-2"></div>
+
+            <div class="voice-ring-3"></div>
+
+
+            <div class="voice-logo">
+
+                <!-- YOUR REAL ICON -->
+                <img
+                    src="/icon.png"
+                    alt="Rashidson AI"
+                >
+
+            </div>
 
         </div>
 
 
-        <p id="voiceSubtitle">
-            Speak naturally, I'm here to help.
-        </p>
+        <div class="voice-status">
 
-    </div>
+            <h3 id="voiceStatus">
+                Ready
+            </h3>
 
+            <div class="voice-bars">
 
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
 
-    <!-- =================================================
-         LIVE CENTER
-    ================================================== -->
+            </div>
 
-    <div class="live-center">
-
-
-        <!-- Outer energy rings -->
-
-        <div class="live-orbit orbit-one"></div>
-
-        <div class="live-orbit orbit-two"></div>
-
-        <div class="live-orbit orbit-three"></div>
-
-
-        <!-- Glow -->
-
-        <div class="live-glow"></div>
-
-
-        <!-- Rashidson icon -->
-
-        <div class="live-logo">
-
-            <img
-                src="/icon.png"
-                alt="Rashidson AI"
-            >
+            <p id="voiceSubtitle">
+                Tap the microphone to speak
+            </p>
 
         </div>
 
     </div>
 
 
+    <!-- BOTTOM -->
 
-    <!-- =================================================
-         EQUALIZER
-    ================================================== -->
+    <div class="voice-bottom">
 
-    <div class="live-equalizer">
-
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-
-    </div>
-
-
-    <p class="live-hint">
-        Rashidson AI is listening
-    </p>
-
-
-
-    <!-- =================================================
-         VOICE CONTROLS
-    ================================================== -->
-
-    <div class="live-controls">
-
-
-        <!-- ASK -->
 
         <button
-            class="live-ask"
+            class="voice-input-button"
             id="voiceTextButton"
             type="button"
         >
 
-            <b>＋</b>
+            <span style="font-size:28px;">＋</span>
 
-            <span>
-                Ask Rashidson AI
-            </span>
+            <span>Ask Rashidson AI</span>
 
         </button>
 
 
-
-        <!-- MICROPHONE -->
-
-        <div class="live-mic-area">
-
-            <button
-                class="live-mic"
-                id="voiceMicButton"
-                type="button"
-                title="Speak"
-            >
-                🎤
-            </button>
-
-            <small>
-                Tap the mic to speak
-            </small>
-
-        </div>
+        <button
+            class="voice-mic"
+            id="voiceMicButton"
+            type="button"
+            title="Speak"
+        >
+            🎙️
+        </button>
 
 
-
-        <!-- END -->
-
-        <div class="live-end-area">
-
-            <button
-                class="live-end"
-                id="voiceEndButton"
-                type="button"
-                title="End"
-            >
-                ✕
-            </button>
-
-            <small>
-                End
-            </small>
-
-        </div>
+        <button
+            class="voice-end"
+            id="voiceEndButton"
+            type="button"
+            title="End conversation"
+        >
+            ×
+        </button>
 
     </div>
 
 </div>
 
 
-
-<!-- =====================================================
-     JAVASCRIPT
-====================================================== -->
+<!-- JAVASCRIPT -->
 
 <script src="script.js"></script>
 
 
-
-<!-- =====================================================
-     SERVICE WORKER
-====================================================== -->
+<!-- SERVICE WORKER -->
 
 <script>
 
 if ("serviceWorker" in navigator) {
 
-    window.addEventListener("load", function () {
+    window.addEventListener("load", () => {
 
-        navigator.serviceWorker
-            .register("/service-worker.js")
-            .then(function () {
+        navigator.serviceWorker.register(
+            "/service-worker.js"
+        )
 
-                console.log(
-                    "Rashidson AI service worker registered."
-                );
+        .then(() => {
 
-            })
-            .catch(function (error) {
+            console.log(
+                "Rashidson AI service worker registered"
+            );
 
-                console.error(
-                    "Service worker registration failed:",
-                    error
-                );
+        })
 
-            });
+        .catch(error => {
+
+            console.error(
+                "Service worker registration failed:",
+                error
+            );
+
+        });
 
     });
 
