@@ -14,13 +14,14 @@ const voiceStatus = document.getElementById("voiceStatus");
 const voiceSubtitle = document.getElementById("voiceSubtitle");
 
 
-/* =========================
-   RASHIDSON AI VOICE
-========================= */
+/* =====================================================
+   RASHIDSON AI SPEECH
+===================================================== */
 
 function speak(text) {
 
     if (!("speechSynthesis" in window)) {
+        console.log("Speech synthesis is not supported.");
         return;
     }
 
@@ -32,33 +33,39 @@ function speak(text) {
     voice.pitch = 1;
     voice.volume = 1;
 
-    voice.onstart = () => {
+    voice.onstart = function () {
 
         if (voiceScreen.classList.contains("active")) {
 
-            voiceStatus.textContent = "Speaking";
+            voiceStatus.textContent = "Speaking...";
+
             voiceSubtitle.textContent =
-                "Rashidson AI is responding...";
+                "Rashidson AI is speaking";
+
         }
+
     };
 
-    voice.onend = () => {
+    voice.onend = function () {
 
         if (voiceScreen.classList.contains("active")) {
 
             voiceStatus.textContent = "Ready";
+
             voiceSubtitle.textContent =
-                "Tap the microphone to speak";
+                "Tap the mic to speak";
+
         }
+
     };
 
     window.speechSynthesis.speak(voice);
 }
 
 
-/* =========================
+/* =====================================================
    ESCAPE HTML
-========================= */
+===================================================== */
 
 function escapeHTML(text) {
 
@@ -70,9 +77,9 @@ function escapeHTML(text) {
 }
 
 
-/* =========================
-   FORMAT AI RESPONSE
-========================= */
+/* =====================================================
+   FORMAT RESPONSE
+===================================================== */
 
 function formatResponse(text) {
 
@@ -80,7 +87,7 @@ function formatResponse(text) {
 
     text = text.replace(
         /```(\w+)?\n?([\s\S]*?)```/g,
-        function(match, language, code) {
+        function (match, language, code) {
 
             const id =
                 "code-" +
@@ -89,63 +96,79 @@ function formatResponse(text) {
                 codeBlocks.length;
 
             codeBlocks.push({
+
                 id: id,
+
                 code: code.trim(),
-                language: language || "code"
+
+                language:
+                    language || "code"
+
             });
 
             return `___CODE_BLOCK_${codeBlocks.length - 1}___`;
+
         }
     );
 
-    let formatted = escapeHTML(text);
+    let formatted =
+        escapeHTML(text);
 
-    formatted = formatted.replace(
-        /\n/g,
-        "<br>"
-    );
+    formatted =
+        formatted.replace(
+            /\n/g,
+            "<br>"
+        );
 
-    codeBlocks.forEach((block, index) => {
+    codeBlocks.forEach(
+        (block, index) => {
 
-        const safeCode =
-            escapeHTML(block.code);
+            const safeCode =
+                escapeHTML(
+                    block.code
+                );
 
-        const codeHTML = `
-            <div class="code-box">
+            const codeHTML = `
+                <div class="code-box">
 
-                <div class="code-header">
+                    <div class="code-header">
 
-                    <span>${block.language}</span>
+                        <span>
+                            ${block.language}
+                        </span>
 
-                    <button
-                        class="copy-code"
-                        data-code-id="${block.id}"
-                    >
-                        Copy
-                    </button>
+                        <button
+                            class="copy-code"
+                            data-code-id="${block.id}"
+                        >
+                            Copy
+                        </button>
+
+                    </div>
+
+                    <pre id="${block.id}">
+<code>${safeCode}</code>
+                    </pre>
 
                 </div>
+            `;
 
-                <pre id="${block.id}">
-                    <code>${safeCode}</code>
-                </pre>
+            formatted =
+                formatted.replace(
+                    `___CODE_BLOCK_${index}___`,
+                    codeHTML
+                );
 
-            </div>
-        `;
-
-        formatted = formatted.replace(
-            `___CODE_BLOCK_${index}___`,
-            codeHTML
-        );
-    });
+        }
+    );
 
     return formatted;
 }
 
 
-/* =========================
+/* =====================================================
    ADD MESSAGE
-========================= */
+===================================================== */
 
 function addMessage(type, text) {
 
@@ -155,25 +178,32 @@ function addMessage(type, text) {
     message.className =
         `message ${type}`;
 
+
     const avatar =
         document.createElement("div");
 
     avatar.className =
         "avatar";
 
-    const img =
-        document.createElement("img");
 
     if (type === "ai") {
 
-        img.src = "icon.png";
-        img.alt = "Rashidson AI";
+        const img =
+            document.createElement("img");
+
+        img.src =
+            "icon.png";
+
+        img.alt =
+            "Rashidson AI";
 
         avatar.appendChild(img);
 
     } else {
 
-        avatar.innerHTML = "👤";
+        avatar.innerHTML =
+            "👤";
+
     }
 
 
@@ -206,6 +236,7 @@ function addMessage(type, text) {
 
         paragraph.textContent =
             text;
+
     }
 
 
@@ -219,11 +250,12 @@ function addMessage(type, text) {
 
     chat.appendChild(message);
 
+
     chat.scrollTop =
         chat.scrollHeight;
 
 
-    /* Copy buttons */
+    /* COPY CODE */
 
     message
         .querySelectorAll(".copy-code")
@@ -241,13 +273,16 @@ function addMessage(type, text) {
                             codeId
                         );
 
-                    const code =
-                        codeElement.innerText;
+                    if (!codeElement) {
+                        return;
+                    }
 
                     try {
 
                         await navigator.clipboard
-                            .writeText(code);
+                            .writeText(
+                                codeElement.innerText
+                            );
 
                         button.textContent =
                             "Copied ✓";
@@ -265,27 +300,32 @@ function addMessage(type, text) {
                             "Copy failed:",
                             error
                         );
+
                     }
+
                 }
             );
+
         });
 
     return message;
 }
 
 
-/* =========================
-   SEND MESSAGE
-========================= */
+/* =====================================================
+   SEND MESSAGE TO AI
+===================================================== */
 
 async function sendMessage(customMessage = null) {
 
     const message =
-        customMessage ||
-        messageInput.value.trim();
+        customMessage !== null
+            ? customMessage.trim()
+            : messageInput.value.trim();
+
 
     if (!message) {
-        return;
+        return null;
     }
 
 
@@ -295,14 +335,15 @@ async function sendMessage(customMessage = null) {
     );
 
 
-    if (!customMessage) {
+    if (customMessage === null) {
 
         messageInput.value = "";
 
     }
 
 
-    sendButton.disabled = true;
+    sendButton.disabled =
+        true;
 
     sendButton.style.opacity =
         "0.6";
@@ -314,16 +355,23 @@ async function sendMessage(customMessage = null) {
             await fetch(
                 "/api/chat",
                 {
+
                     method: "POST",
 
                     headers: {
+
                         "Content-Type":
                             "application/json"
+
                     },
 
                     body: JSON.stringify({
-                        message: message
+
+                        message:
+                            message
+
                     })
+
                 }
             );
 
@@ -338,6 +386,7 @@ async function sendMessage(customMessage = null) {
                 data.error ||
                 "AI request failed"
             );
+
         }
 
 
@@ -381,6 +430,9 @@ async function sendMessage(customMessage = null) {
         );
 
 
+        return null;
+
+
     } finally {
 
         sendButton.disabled =
@@ -390,27 +442,32 @@ async function sendMessage(customMessage = null) {
             "1";
 
         messageInput.focus();
+
     }
 }
 
 
-/* =========================
+/* =====================================================
    NORMAL SEND BUTTON
-========================= */
+===================================================== */
 
 sendButton.addEventListener(
     "click",
-    () => sendMessage()
+    () => {
+
+        sendMessage();
+
+    }
 );
 
 
-/* =========================
+/* =====================================================
    ENTER KEY
-========================= */
+===================================================== */
 
 messageInput.addEventListener(
     "keydown",
-    function(event) {
+    function (event) {
 
         if (
             event.key === "Enter" &&
@@ -420,23 +477,24 @@ messageInput.addEventListener(
             event.preventDefault();
 
             sendMessage();
+
         }
+
     }
 );
 
 
-/* ==================================================
+/* =====================================================
    SPEECH RECOGNITION
-================================================== */
+===================================================== */
 
 const SpeechRecognition =
     window.SpeechRecognition ||
     window.webkitSpeechRecognition;
 
-
 let recognition = null;
 
-let listening = false;
+let isListening = false;
 
 
 if (SpeechRecognition) {
@@ -444,340 +502,407 @@ if (SpeechRecognition) {
     recognition =
         new SpeechRecognition();
 
-    recognition.continuous = false;
+    recognition.continuous =
+        false;
 
-    recognition.interimResults = false;
+    recognition.interimResults =
+        false;
 
-    recognition.lang = "en-US";
+    recognition.lang =
+        "en-US";
 
 
-    recognition.onstart = () => {
+    recognition.onstart =
+        function () {
 
-        listening = true;
+            isListening = true;
 
-        if (voiceScreen.classList.contains("active")) {
+            setListeningUI(true);
 
-            voiceStatus.textContent =
-                "Listening";
-
-            voiceSubtitle.textContent =
-                "I'm listening...";
-        }
-
-        if (micButton) {
-
-            micButton.textContent =
-                "🔴";
-        }
-    };
+        };
 
 
     recognition.onresult =
-        async function(event) {
+        async function (event) {
 
             const transcript =
                 event.results[0][0].transcript;
 
             console.log(
-                "Speech:",
+                "Recognized:",
                 transcript
             );
 
 
-            if (voiceScreen.classList.contains("active")) {
+            if (
+                voiceScreen.classList.contains(
+                    "active"
+                )
+            ) {
 
                 voiceStatus.textContent =
-                    "Thinking";
+                    "Thinking...";
 
                 voiceSubtitle.textContent =
+                    "Rashidson AI is thinking";
+
+
+                await sendMessage(
+                    transcript
+                );
+
+
+            } else {
+
+                messageInput.value =
                     transcript;
+
             }
 
-
-            await sendVoiceMessage(
-                transcript
-            );
         };
 
 
     recognition.onerror =
-        function(event) {
+        function (event) {
 
             console.error(
                 "Speech recognition error:",
                 event.error
             );
 
+            setListeningUI(false);
 
-            listening = false;
 
+            if (
+                event.error ===
+                "not-allowed"
+            ) {
 
-            if (voiceScreen.classList.contains("active")) {
+                if (
+                    voiceScreen.classList.contains(
+                        "active"
+                    )
+                ) {
 
-                voiceStatus.textContent =
-                    "Ready";
+                    voiceStatus.textContent =
+                        "Microphone blocked";
 
-                voiceSubtitle.textContent =
-                    "Tap the microphone to speak";
+                    voiceSubtitle.textContent =
+                        "Allow microphone access in your browser";
+
+                } else {
+
+                    alert(
+                        "Please allow microphone access for Rashidson AI."
+                    );
+
+                }
+
+            } else {
+
+                if (
+                    voiceScreen.classList.contains(
+                        "active"
+                    )
+                ) {
+
+                    voiceStatus.textContent =
+                        "Ready";
+
+                    voiceSubtitle.textContent =
+                        "Tap the mic to speak";
+
+                }
+
             }
+
         };
 
 
     recognition.onend =
-        function() {
+        function () {
 
-            listening = false;
+            isListening = false;
 
-            if (micButton) {
+            setListeningUI(false);
 
-                micButton.textContent =
-                    "🎤";
-            }
         };
+
 }
 
 
-/* =========================
+/* =====================================================
+   LISTENING UI
+===================================================== */
+
+function setListeningUI(active) {
+
+    if (!voiceScreen.classList.contains("active")) {
+        return;
+    }
+
+
+    if (active) {
+
+        voiceStatus.textContent =
+            "Listening...";
+
+        voiceSubtitle.textContent =
+            "Speak naturally, I'm here to help.";
+
+        voiceMicButton.classList.add(
+            "listening"
+        );
+
+    } else {
+
+        voiceMicButton.classList.remove(
+            "listening"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
    START MICROPHONE
-========================= */
+===================================================== */
 
 function startListening() {
 
     if (!recognition) {
 
         alert(
-            "Voice recognition is not supported by this browser. Try Chrome or Edge."
+            "Voice recognition is not supported by this browser. Try Google Chrome or Microsoft Edge."
         );
 
         return;
+
     }
 
 
-    if (listening) {
+    if (isListening) {
 
         recognition.stop();
 
         return;
+
     }
 
 
     try {
+
+        window.speechSynthesis.cancel();
 
         recognition.start();
 
     } catch (error) {
 
         console.error(
-            "Microphone error:",
-            error
-        );
-    }
-}
-
-
-/* =========================
-   VOICE MESSAGE
-========================= */
-
-async function sendVoiceMessage(text) {
-
-    try {
-
-        const response =
-            await fetch(
-                "/api/chat",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        message: text
-                    })
-                }
-            );
-
-
-        const data =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                data.error ||
-                "AI request failed"
-            );
-        }
-
-
-        const reply =
-            data.reply ||
-            "Sorry, I couldn't answer that.";
-
-
-        /* Add conversation to normal chat */
-
-        addMessage(
-            "user",
-            text
-        );
-
-        addMessage(
-            "ai",
-            reply
-        );
-
-
-        /* Speak AI response */
-
-        speak(reply);
-
-
-        if (voiceScreen.classList.contains("active")) {
-
-            voiceStatus.textContent =
-                "Speaking";
-
-            voiceSubtitle.textContent =
-                "Rashidson AI is responding...";
-        }
-
-
-    } catch (error) {
-
-        console.error(
-            "Voice AI error:",
+            "Microphone start error:",
             error
         );
 
-
-        const errorMessage =
-            "Sorry, I couldn't connect to Rashidson AI.";
-
-
-        if (voiceScreen.classList.contains("active")) {
-
-            voiceStatus.textContent =
-                "Connection error";
-
-            voiceSubtitle.textContent =
-                "Please try again";
-        }
-
-
-        speak(
-            errorMessage
-        );
     }
+
 }
 
 
-/* =========================
-   SMALL MIC BUTTON
-========================= */
+/* =====================================================
+   NORMAL MIC BUTTON
+===================================================== */
 
 if (micButton) {
 
     micButton.addEventListener(
         "click",
-        startListening
+        function () {
+
+            startListening();
+
+        }
     );
+
 }
 
 
-/* =========================
-   OPEN VOICE SCREEN
-========================= */
+/* =====================================================
+   OPEN VOICE CALL
+===================================================== */
 
 if (callButton) {
 
     callButton.addEventListener(
         "click",
-        function() {
+        function () {
 
-            voiceScreen.classList.add(
-                "active"
-            );
+            openVoiceScreen();
 
-
-            voiceStatus.textContent =
-                "Ready";
-
-
-            voiceSubtitle.textContent =
-                "Tap the microphone to speak";
         }
     );
+
 }
 
 
-/* =========================
-   BIG VOICE MIC
-========================= */
+/* =====================================================
+   OPEN VOICE SCREEN
+===================================================== */
 
-if (voiceMicButton) {
+function openVoiceScreen() {
 
-    voiceMicButton.addEventListener(
-        "click",
-        startListening
+    voiceScreen.classList.add(
+        "active"
     );
+
+
+    voiceStatus.textContent =
+        "Ready";
+
+
+    voiceSubtitle.textContent =
+        "Tap the mic to speak";
+
+
+    document.body.style.overflow =
+        "hidden";
+
 }
 
 
-/* =========================
-   END VOICE CALL
-========================= */
+/* =====================================================
+   CLOSE VOICE SCREEN
+===================================================== */
 
-if (voiceEndButton) {
+function closeVoiceScreen() {
 
-    voiceEndButton.addEventListener(
-        "click",
-        function() {
+    if (recognition && isListening) {
 
-            if (recognition && listening) {
+        recognition.stop();
 
-                recognition.stop();
-            }
+    }
 
 
-            window.speechSynthesis.cancel();
+    window.speechSynthesis.cancel();
 
 
-            voiceScreen.classList.remove(
-                "active"
-            );
-
-
-            voiceStatus.textContent =
-                "Ready";
-
-
-            voiceSubtitle.textContent =
-                "Tap the microphone to speak";
-        }
+    voiceScreen.classList.remove(
+        "active"
     );
+
+
+    document.body.style.overflow =
+        "";
+
+
+    voiceStatus.textContent =
+        "Ready";
+
+
+    voiceSubtitle.textContent =
+        "Tap the mic to speak";
+
 }
 
 
-/* =========================
-   ASK RASHIDSON AI BUTTON
-========================= */
+/* =====================================================
+   VOICE MIC BUTTON
+===================================================== */
 
-if (voiceTextButton) {
+voiceMicButton.addEventListener(
+    "click",
+    function () {
 
-    voiceTextButton.addEventListener(
+        startListening();
+
+    }
+);
+
+
+/* =====================================================
+   END CALL
+===================================================== */
+
+voiceEndButton.addEventListener(
+    "click",
+    function () {
+
+        closeVoiceScreen();
+
+    }
+);
+
+
+/* =====================================================
+   TEXT BUTTON
+===================================================== */
+
+voiceTextButton.addEventListener(
+    "click",
+    function () {
+
+        closeVoiceScreen();
+
+        setTimeout(
+            () => {
+
+                messageInput.focus();
+
+            },
+            100
+        );
+
+    }
+);
+
+
+/* =====================================================
+   TOP MENU
+===================================================== */
+
+const voiceMenuButton =
+    document.getElementById(
+        "voiceMenuButton"
+    );
+
+
+if (voiceMenuButton) {
+
+    voiceMenuButton.addEventListener(
         "click",
-        function() {
+        function () {
 
-            voiceScreen.classList.remove(
-                "active"
+            console.log(
+                "Rashidson AI menu"
             );
 
-            messageInput.focus();
         }
     );
+
+}
+
+
+/* =====================================================
+   TOP SETTINGS
+===================================================== */
+
+const voiceSettingsButton =
+    document.getElementById(
+        "voiceSettingsButton"
+    );
+
+
+if (voiceSettingsButton) {
+
+    voiceSettingsButton.addEventListener(
+        "click",
+        function () {
+
+            console.log(
+                "Rashidson AI voice settings"
+            );
+
+        }
+    );
+
 }
