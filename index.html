@@ -10,1333 +10,47 @@
     <link rel="icon" type="image/png" href="/icon.png">
     <link rel="manifest" href="/manifest.json">
 
-    <meta name="theme-color" content="#050511">
+    <meta name="theme-color" content="#050816">
 
     <link rel="stylesheet" href="style.css?v=200">
-
-    <style>
-
-        /* =====================================================
-           BASIC
-        ===================================================== */
-
-        * {
-            box-sizing: border-box;
-        }
-
-
-        /* =====================================================
-           TOP LOGO
-        ===================================================== */
-
-        .logo {
-            width: 38px !important;
-            height: 38px !important;
-            min-width: 38px !important;
-            min-height: 38px !important;
-            max-width: 38px !important;
-            max-height: 38px !important;
-
-            border-radius: 10px !important;
-
-            overflow: hidden !important;
-        }
-
-        .logo img {
-            width: 100% !important;
-            height: 100% !important;
-
-            object-fit: contain !important;
-        }
-
-        .top-bar {
-            height: 60px !important;
-            min-height: 60px !important;
-        }
-
-
-        /* =====================================================
-           FULL SCREEN VOICE MODE
-        ===================================================== */
-
-        #voiceScreen {
-
-            position: fixed;
-
-            inset: 0;
-
-            width: 100vw;
-            height: 100vh;
-
-            z-index: 99999;
-
-            display: none;
-
-            flex-direction: column;
-
-            overflow: hidden;
-
-            color: white;
-
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-
-            background:
-
-                radial-gradient(
-                    circle at 50% 43%,
-                    rgba(91, 55, 190, .42) 0%,
-                    rgba(34, 28, 92, .35) 22%,
-                    rgba(8, 8, 28, .95) 55%,
-                    #000000 100%
-                );
-        }
-
-
-        #voiceScreen.active {
-
-            display: flex;
-        }
-
-
-        /* =====================================================
-           BACKGROUND ENERGY
-        ===================================================== */
-
-        #voiceScreen::before {
-
-            content: "";
-
-            position: absolute;
-
-            width: 600px;
-            height: 600px;
-
-            left: 50%;
-            top: 43%;
-
-            transform:
-                translate(-50%, -50%);
-
-            border-radius: 50%;
-
-            background:
-
-                radial-gradient(
-                    circle,
-                    rgba(0, 180, 255, .08),
-                    rgba(120, 60, 255, .08) 35%,
-                    transparent 70%
-                );
-
-            filter: blur(30px);
-
-            pointer-events: none;
-
-            animation:
-                backgroundPulse 4s ease-in-out infinite;
-        }
-
-
-        /* =====================================================
-           TOP BAR
-        ===================================================== */
-
-        .voice-top {
-
-            position: relative;
-
-            z-index: 20;
-
-            width: 100%;
-
-            height: 78px;
-
-            padding:
-                15px
-                20px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: space-between;
-
-            flex-shrink: 0;
-        }
-
-
-        .voice-control {
-
-            width: 44px;
-            height: 44px;
-
-            border-radius: 50%;
-
-            border:
-                1px solid
-                rgba(255,255,255,.14);
-
-            background:
-                rgba(255,255,255,.07);
-
-            color: white;
-
-            font-size: 20px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            cursor: pointer;
-
-            backdrop-filter:
-                blur(15px);
-
-            -webkit-backdrop-filter:
-                blur(15px);
-
-            transition:
-                .2s ease;
-        }
-
-
-        .voice-control:active {
-
-            transform: scale(.9);
-        }
-
-
-        .voice-title {
-
-            text-align: center;
-
-            flex: 1;
-        }
-
-
-        .voice-title h2 {
-
-            margin: 0;
-
-            font-size: 17px;
-
-            font-weight: 700;
-
-            letter-spacing: 2px;
-
-            color: white;
-
-            text-shadow:
-                0 0 15px
-                rgba(100,150,255,.4);
-        }
-
-
-        .voice-title p {
-
-            margin:
-                5px
-                0
-                0;
-
-            font-size: 11px;
-
-            color:
-                rgba(255,255,255,.48);
-        }
-
-
-        /* =====================================================
-           CENTER
-        ===================================================== */
-
-        .voice-center {
-
-            position: relative;
-
-            z-index: 10;
-
-            flex: 1;
-
-            min-height: 0;
-
-            display: flex;
-
-            flex-direction: column;
-
-            align-items: center;
-
-            justify-content: center;
-        }
-
-
-        /* =====================================================
-           ORB
-        ===================================================== */
-
-        .voice-orb {
-
-            position: relative;
-
-            width: 340px;
-            height: 340px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-        }
-
-
-        /* =====================================================
-           LARGE GLOW
-        ===================================================== */
-
-        .voice-orb::before {
-
-            content: "";
-
-            position: absolute;
-
-            width: 270px;
-            height: 270px;
-
-            border-radius: 50%;
-
-            background:
-
-                radial-gradient(
-                    circle,
-                    rgba(82, 93, 255, .35) 0%,
-                    rgba(0, 205, 255, .15) 35%,
-                    rgba(105, 55, 255, .10) 55%,
-                    transparent 72%
-                );
-
-            filter: blur(25px);
-
-            animation:
-                orbGlow 2.4s ease-in-out infinite;
-        }
-
-
-        /* =====================================================
-           MAIN LIVE ENERGY RING
-        ===================================================== */
-
-        .voice-ring {
-
-            position: absolute;
-
-            width: 285px;
-            height: 285px;
-
-            border-radius: 50%;
-
-            background:
-
-                conic-gradient(
-                    from 0deg,
-                    transparent 0deg,
-                    transparent 25deg,
-
-                    #765cff 55deg,
-
-                    #00d9ff 100deg,
-
-                    #8c62ff 145deg,
-
-                    transparent 185deg,
-
-                    transparent 220deg,
-
-                    #00d9ff 260deg,
-
-                    #765cff 310deg,
-
-                    transparent 350deg
-                );
-
-            -webkit-mask:
-
-                radial-gradient(
-                    circle,
-                    transparent 64%,
-                    black 65%
-                );
-
-            mask:
-
-                radial-gradient(
-                    circle,
-                    transparent 64%,
-                    black 65%
-                );
-
-            animation:
-                energyRotate
-                3.5s
-                linear
-                infinite;
-
-            filter:
-                drop-shadow(
-                    0 0 7px
-                    rgba(0,210,255,.9)
-                );
-        }
-
-
-        /* =====================================================
-           SECOND WAVE
-        ===================================================== */
-
-        .voice-ring-2 {
-
-            position: absolute;
-
-            width: 245px;
-            height: 245px;
-
-            border-radius: 50%;
-
-            border:
-                1px solid
-                rgba(48,210,255,.5);
-
-            box-shadow:
-
-                0 0 20px
-                rgba(0,200,255,.35),
-
-                0 0 45px
-                rgba(115,70,255,.25),
-
-                inset 0 0 25px
-                rgba(100,70,255,.2);
-
-            animation:
-                wavePulse
-                2s
-                ease-in-out
-                infinite;
-        }
-
-
-        /* =====================================================
-           THIRD WAVE
-        ===================================================== */
-
-        .voice-ring-3 {
-
-            position: absolute;
-
-            width: 320px;
-            height: 320px;
-
-            border-radius: 50%;
-
-            border:
-                1px solid
-                rgba(112,79,255,.18);
-
-            box-shadow:
-                0 0 30px
-                rgba(100,80,255,.12);
-
-            animation:
-                outerWave
-                3s
-                ease-in-out
-                infinite;
-        }
-
-
-        /* =====================================================
-           SMALL ENERGY PARTICLES
-        ===================================================== */
-
-        .voice-ring-3::before {
-
-            content: "";
-
-            position: absolute;
-
-            inset: 8px;
-
-            border-radius: 50%;
-
-            border:
-                1px dashed
-                rgba(0,210,255,.20);
-
-            animation:
-                particleRotate
-                12s
-                linear
-                infinite;
-        }
-
-
-        /* =====================================================
-           YOUR REAL RASHIDSON ICON
-        ===================================================== */
-
-        .voice-logo {
-
-            position: relative;
-
-            z-index: 20;
-
-            width: 155px;
-            height: 155px;
-
-            border-radius: 50%;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            background:
-
-                radial-gradient(
-                    circle at 38% 30%,
-                    #1d2c5a 0%,
-                    #101734 35%,
-                    #070a1d 68%,
-                    #02030a 100%
-                );
-
-            border:
-                2px solid
-                rgba(92,160,255,.82);
-
-            box-shadow:
-
-                0 0 20px
-                rgba(46,155,255,.75),
-
-                0 0 45px
-                rgba(92,70,255,.50),
-
-                0 0 90px
-                rgba(73,74,255,.22),
-
-                inset 0 0 30px
-                rgba(65,130,255,.25);
-
-            animation:
-                logoBreath
-                2s
-                ease-in-out
-                infinite;
-        }
-
-
-        .voice-logo::before {
-
-            content: "";
-
-            position: absolute;
-
-            inset: -5px;
-
-            border-radius: 50%;
-
-            border:
-                1px solid
-                rgba(0,217,255,.3);
-
-            animation:
-                logoBorder
-                2s
-                ease-in-out
-                infinite;
-        }
-
-
-        .voice-logo img {
-
-            width: 78%;
-            height: 78%;
-
-            object-fit: contain;
-
-            position: relative;
-
-            z-index: 5;
-
-            filter:
-
-                drop-shadow(
-                    0 0 10px
-                    rgba(50,190,255,.95)
-                )
-
-                drop-shadow(
-                    0 0 25px
-                    rgba(105,70,255,.7)
-                );
-        }
-
-
-        /* =====================================================
-           STATUS
-        ===================================================== */
-
-        .voice-status {
-
-            position: relative;
-
-            z-index: 30;
-
-            margin-top: 25px;
-
-            text-align: center;
-        }
-
-
-        .voice-status h3 {
-
-            margin: 0;
-
-            font-size: 20px;
-
-            font-weight: 600;
-
-            letter-spacing: .2px;
-
-            text-shadow:
-                0 0 15px
-                rgba(255,255,255,.15);
-        }
-
-
-        .voice-status p {
-
-            margin:
-                8px
-                0
-                0;
-
-            font-size: 12px;
-
-            color:
-                rgba(255,255,255,.48);
-        }
-
-
-        /* =====================================================
-           AUDIO WAVE
-        ===================================================== */
-
-        .voice-bars {
-
-            height: 25px;
-
-            margin-top: 12px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            gap: 4px;
-        }
-
-
-        .voice-bars span {
-
-            width: 3px;
-
-            height: 6px;
-
-            border-radius: 20px;
-
-            background:
-
-                linear-gradient(
-                    #00d9ff,
-                    #765cff
-                );
-
-            box-shadow:
-                0 0 8px
-                rgba(0,200,255,.8);
-
-            animation:
-                soundWave
-                .65s
-                ease-in-out
-                infinite;
-        }
-
-
-        .voice-bars span:nth-child(1) {
-            animation-delay: .05s;
-        }
-
-        .voice-bars span:nth-child(2) {
-            animation-delay: .12s;
-        }
-
-        .voice-bars span:nth-child(3) {
-            animation-delay: .19s;
-        }
-
-        .voice-bars span:nth-child(4) {
-            animation-delay: .26s;
-        }
-
-        .voice-bars span:nth-child(5) {
-            animation-delay: .19s;
-        }
-
-        .voice-bars span:nth-child(6) {
-            animation-delay: .12s;
-        }
-
-        .voice-bars span:nth-child(7) {
-            animation-delay: .05s;
-        }
-
-
-        /* =====================================================
-           BOTTOM CONTROLS
-        ===================================================== */
-
-        .voice-bottom {
-
-            position: relative;
-
-            z-index: 50;
-
-            width: 100%;
-
-            min-height: 115px;
-
-            padding:
-                10px
-                18px
-                25px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            gap: 18px;
-
-            flex-shrink: 0;
-        }
-
-
-        /* ASK */
-
-        .voice-input-button {
-
-            height: 54px;
-
-            padding:
-                0
-                18px;
-
-            border-radius: 30px;
-
-            border:
-                1px solid
-                rgba(255,255,255,.12);
-
-            background:
-                rgba(255,255,255,.06);
-
-            color:
-                rgba(255,255,255,.75);
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 8px;
-
-            font-size: 12px;
-
-            cursor: pointer;
-
-            backdrop-filter:
-                blur(15px);
-
-            -webkit-backdrop-filter:
-                blur(15px);
-        }
-
-
-        .voice-input-button:active {
-
-            transform: scale(.96);
-        }
-
-
-        /* =====================================================
-           BIG MICROPHONE
-        ===================================================== */
-
-        .voice-mic {
-
-            width: 68px;
-            height: 68px;
-
-            flex-shrink: 0;
-
-            border-radius: 50%;
-
-            border:
-                2px solid
-                #36d3ff;
-
-            background:
-
-                radial-gradient(
-                    circle at 35% 30%,
-                    #20396b,
-                    #0c1730 55%,
-                    #050916 100%
-                );
-
-            color: white;
-
-            font-size: 27px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            cursor: pointer;
-
-            box-shadow:
-
-                0 0 18px
-                rgba(30,205,255,.75),
-
-                0 0 42px
-                rgba(80,80,255,.35);
-
-            animation:
-                microphonePulse
-                1.6s
-                ease-in-out
-                infinite;
-        }
-
-
-        .voice-mic:active {
-
-            transform: scale(.90);
-        }
-
-
-        /* =====================================================
-           END BUTTON
-        ===================================================== */
-
-        .voice-end {
-
-            width: 55px;
-            height: 55px;
-
-            flex-shrink: 0;
-
-            border-radius: 50%;
-
-            border:
-                1px solid
-                rgba(255,55,85,.8);
-
-            background:
-
-                radial-gradient(
-                    circle,
-                    #74182e,
-                    #26060f
-                );
-
-            color: white;
-
-            font-size: 22px;
-
-            cursor: pointer;
-
-            box-shadow:
-                0 0 20px
-                rgba(255,40,75,.45);
-
-            transition:
-                .2s ease;
-        }
-
-
-        .voice-end:active {
-
-            transform:
-                scale(.88);
-        }
-
-
-        /* =====================================================
-           ANIMATIONS
-        ===================================================== */
-
-        @keyframes energyRotate {
-
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-
-        @keyframes wavePulse {
-
-            0%,
-            100% {
-
-                transform:
-                    scale(.92);
-
-                opacity: .35;
-            }
-
-            50% {
-
-                transform:
-                    scale(1.08);
-
-                opacity: .9;
-            }
-        }
-
-
-        @keyframes outerWave {
-
-            0%,
-            100% {
-
-                transform:
-                    scale(.94);
-
-                opacity: .2;
-            }
-
-            50% {
-
-                transform:
-                    scale(1.08);
-
-                opacity: .7;
-            }
-        }
-
-
-        @keyframes particleRotate {
-
-            from {
-                transform:
-                    rotate(0deg);
-            }
-
-            to {
-                transform:
-                    rotate(-360deg);
-            }
-        }
-
-
-        @keyframes orbGlow {
-
-            0%,
-            100% {
-
-                transform:
-                    scale(.82);
-
-                opacity: .45;
-            }
-
-            50% {
-
-                transform:
-                    scale(1.2);
-
-                opacity: 1;
-            }
-        }
-
-
-        @keyframes logoBreath {
-
-            0%,
-            100% {
-
-                transform:
-                    scale(.96);
-            }
-
-            50% {
-
-                transform:
-                    scale(1.06);
-            }
-        }
-
-
-        @keyframes logoBorder {
-
-            0%,
-            100% {
-
-                transform:
-                    scale(.95);
-
-                opacity: .3;
-            }
-
-            50% {
-
-                transform:
-                    scale(1.07);
-
-                opacity: .9;
-            }
-        }
-
-
-        @keyframes microphonePulse {
-
-            0%,
-            100% {
-
-                transform:
-                    scale(1);
-            }
-
-            50% {
-
-                transform:
-                    scale(1.07);
-            }
-        }
-
-
-        @keyframes soundWave {
-
-            0%,
-            100% {
-
-                height: 5px;
-            }
-
-            50% {
-
-                height: 21px;
-            }
-        }
-
-
-        @keyframes backgroundPulse {
-
-            0%,
-            100% {
-
-                opacity: .45;
-
-                transform:
-                    translate(-50%, -50%)
-                    scale(.85);
-            }
-
-            50% {
-
-                opacity: 1;
-
-                transform:
-                    translate(-50%, -50%)
-                    scale(1.15);
-            }
-        }
-
-
-        /* =====================================================
-           PHONE
-        ===================================================== */
-
-        @media (max-width: 600px) {
-
-            .voice-top {
-
-                height: 70px;
-
-                padding:
-                    12px
-                    15px;
-            }
-
-
-            .voice-control {
-
-                width: 40px;
-                height: 40px;
-
-                font-size: 18px;
-            }
-
-
-            .voice-title h2 {
-
-                font-size: 15px;
-            }
-
-
-            .voice-title p {
-
-                font-size: 10px;
-            }
-
-
-            .voice-orb {
-
-                width: 300px;
-                height: 300px;
-            }
-
-
-            .voice-ring {
-
-                width: 255px;
-                height: 255px;
-            }
-
-
-            .voice-ring-2 {
-
-                width: 220px;
-                height: 220px;
-            }
-
-
-            .voice-ring-3 {
-
-                width: 290px;
-                height: 290px;
-            }
-
-
-            .voice-logo {
-
-                width: 145px;
-                height: 145px;
-            }
-
-
-            .voice-status {
-
-                margin-top: 18px;
-            }
-
-
-            .voice-status h3 {
-
-                font-size: 18px;
-            }
-
-
-            .voice-status p {
-
-                font-size: 11px;
-            }
-
-
-            .voice-bottom {
-
-                min-height: 105px;
-
-                gap: 12px;
-
-                padding:
-                    8px
-                    12px
-                    22px;
-            }
-
-
-            .voice-input-button {
-
-                height: 50px;
-
-                padding:
-                    0
-                    13px;
-
-                font-size: 11px;
-            }
-
-
-            .voice-mic {
-
-                width: 62px;
-                height: 62px;
-
-                font-size: 25px;
-            }
-
-
-            .voice-end {
-
-                width: 52px;
-                height: 52px;
-
-                font-size: 21px;
-            }
-        }
-
-
-        /* =====================================================
-           VERY SMALL PHONES
-        ===================================================== */
-
-        @media (max-height: 650px) {
-
-            .voice-top {
-
-                height: 60px;
-            }
-
-
-            .voice-orb {
-
-                width: 250px;
-                height: 250px;
-            }
-
-
-            .voice-ring {
-
-                width: 215px;
-                height: 215px;
-            }
-
-
-            .voice-ring-2 {
-
-                width: 185px;
-                height: 185px;
-            }
-
-
-            .voice-ring-3 {
-
-                width: 240px;
-                height: 240px;
-            }
-
-
-            .voice-logo {
-
-                width: 125px;
-                height: 125px;
-            }
-
-
-            .voice-status {
-
-                margin-top: 5px;
-            }
-
-
-            .voice-bottom {
-
-                min-height: 90px;
-
-                padding-bottom: 12px;
-            }
-        }
-
-    </style>
-
 </head>
-
 
 <body>
 
 <div class="app">
 
-
-    <!-- =====================================================
+    <!-- =================================================
          NORMAL CHAT
-    ===================================================== -->
+    ================================================== -->
 
     <header class="top-bar">
 
         <div class="brand">
 
             <div class="logo">
-
-                <img
-                    src="/icon.png"
-                    alt="RSai"
-                >
-
+                <img src="/icon.png" alt="Rashidson AI">
             </div>
 
-
-            <div>
-
-                <h1>
-                    Rashidson AI
-                </h1>
-
-                <p>
-                    Smart AI Assistant
-                </p>
-
+            <div class="brand-text">
+                <h1>Rashidson AI</h1>
+                <p>Smart AI Assistant</p>
             </div>
 
         </div>
 
-
         <div class="status">
-
             <span class="status-dot"></span>
-
             Online
-
         </div>
 
     </header>
 
 
-    <!-- =====================================================
+    <!-- =================================================
          CHAT
-    ===================================================== -->
+    ================================================== -->
 
-    <main
-        id="chat"
-        class="chat"
-    >
+    <main id="chat" class="chat">
 
         <div class="welcome">
 
@@ -1344,22 +58,18 @@
 
                 <img
                     src="/icon.png"
-                    alt="RSai"
+                    alt="Rashidson AI"
                 >
 
             </div>
-
 
             <h2>
                 Welcome to Rashidson AI
             </h2>
 
-
             <p>
-
                 Your intelligent AI assistant.
                 Ask me anything and let's get started.
-
             </p>
 
         </div>
@@ -1371,11 +81,10 @@
 
                 <img
                     src="/icon.png"
-                    alt="RSai"
+                    alt="Rashidson AI"
                 >
 
             </div>
-
 
             <div class="message-content">
 
@@ -1383,12 +92,9 @@
                     Rashidson AI
                 </strong>
 
-
                 <p>
-
                     Hello! 👋 I'm Rashidson AI.
                     How can I help you today?
-
                 </p>
 
             </div>
@@ -1398,9 +104,9 @@
     </main>
 
 
-    <!-- =====================================================
-         NORMAL INPUT
-    ===================================================== -->
+    <!-- =================================================
+         CHAT INPUT
+    ================================================== -->
 
     <div class="input-area">
 
@@ -1424,7 +130,7 @@
         <button
             id="callButton"
             type="button"
-            title="Start voice conversation"
+            title="Voice conversation"
         >
             📞
         </button>
@@ -1453,19 +159,20 @@
 
 
 <!-- =====================================================
-     FULL SCREEN VOICE INTERFACE
-===================================================== -->
+     RASHIDSON AI LIVE VOICE SCREEN
+====================================================== -->
 
 <div id="voiceScreen">
 
 
-    <!-- TOP -->
+    <!-- =================================================
+         TOP
+    ================================================== -->
 
-    <div class="voice-top">
-
+    <div class="live-top">
 
         <button
-            class="voice-control"
+            class="live-button"
             id="voiceMenuButton"
             type="button"
         >
@@ -1473,21 +180,19 @@
         </button>
 
 
-        <div class="voice-title">
+        <div class="live-brand">
 
             <h2>
-                RASHIDSON AI
+                RASHIDSON <span>AI</span>
             </h2>
 
-            <p>
-                Voice Conversation
-            </p>
+            <div></div>
 
         </div>
 
 
         <button
-            class="voice-control"
+            class="live-button"
             id="voiceSettingsButton"
             type="button"
         >
@@ -1498,75 +203,60 @@
 
 
 
-    <!-- CENTER -->
+    <!-- =================================================
+         LISTENING STATUS
+    ================================================== -->
 
-    <div class="voice-center">
+    <div class="live-state">
 
+        <div class="live-state-title">
 
-        <!-- LIVE ORB -->
+            <span class="live-dot"></span>
 
-        <div class="voice-orb">
-
-
-            <!-- MAIN MOVING RING -->
-
-            <div class="voice-ring"></div>
-
-
-            <!-- SECOND WAVE -->
-
-            <div class="voice-ring-2"></div>
-
-
-            <!-- OUTER WAVE -->
-
-            <div class="voice-ring-3"></div>
-
-
-            <!-- REAL RASHIDSON ICON -->
-
-            <div class="voice-logo">
-
-                <img
-                    src="/icon.png"
-                    alt="Rashidson AI"
-                >
-
-            </div>
+            <strong id="voiceStatus">
+                Listening...
+            </strong>
 
         </div>
 
 
+        <p id="voiceSubtitle">
+            Speak naturally, I'm here to help.
+        </p>
 
-        <!-- STATUS -->
-
-        <div class="voice-status">
-
-            <h3 id="voiceStatus">
-                Ready
-            </h3>
+    </div>
 
 
-            <!-- AUDIO WAVE -->
 
-            <div class="voice-bars">
+    <!-- =================================================
+         LIVE CENTER
+    ================================================== -->
 
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-
-            </div>
+    <div class="live-center">
 
 
-            <p id="voiceSubtitle">
+        <!-- Outer energy rings -->
 
-                Tap the microphone to speak
+        <div class="live-orbit orbit-one"></div>
 
-            </p>
+        <div class="live-orbit orbit-two"></div>
+
+        <div class="live-orbit orbit-three"></div>
+
+
+        <!-- Glow -->
+
+        <div class="live-glow"></div>
+
+
+        <!-- Rashidson icon -->
+
+        <div class="live-logo">
+
+            <img
+                src="/icon.png"
+                alt="Rashidson AI"
+            >
 
         </div>
 
@@ -1575,25 +265,46 @@
 
 
     <!-- =================================================
-         BOTTOM
+         EQUALIZER
     ================================================== -->
 
-    <div class="voice-bottom">
+    <div class="live-equalizer">
+
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+
+    </div>
+
+
+    <p class="live-hint">
+        Rashidson AI is listening
+    </p>
+
+
+
+    <!-- =================================================
+         VOICE CONTROLS
+    ================================================== -->
+
+    <div class="live-controls">
 
 
         <!-- ASK -->
 
         <button
-            class="voice-input-button"
+            class="live-ask"
             id="voiceTextButton"
             type="button"
         >
 
-            <span
-                style="font-size:24px;"
-            >
-                ＋
-            </span>
+            <b>＋</b>
 
             <span>
                 Ask Rashidson AI
@@ -1605,31 +316,43 @@
 
         <!-- MICROPHONE -->
 
-        <button
-            class="voice-mic"
-            id="voiceMicButton"
-            type="button"
-            title="Speak"
-        >
+        <div class="live-mic-area">
 
-            🎤
+            <button
+                class="live-mic"
+                id="voiceMicButton"
+                type="button"
+                title="Speak"
+            >
+                🎤
+            </button>
 
-        </button>
+            <small>
+                Tap the mic to speak
+            </small>
+
+        </div>
 
 
 
         <!-- END -->
 
-        <button
-            class="voice-end"
-            id="voiceEndButton"
-            type="button"
-            title="End conversation"
-        >
+        <div class="live-end-area">
 
-            ✕
+            <button
+                class="live-end"
+                id="voiceEndButton"
+                type="button"
+                title="End"
+            >
+                ✕
+            </button>
 
-        </button>
+            <small>
+                End
+            </small>
+
+        </div>
 
     </div>
 
@@ -1638,51 +361,42 @@
 
 
 <!-- =====================================================
-     YOUR JAVASCRIPT
-===================================================== -->
+     JAVASCRIPT
+====================================================== -->
 
-<script src="/script.js?v=200"></script>
+<script src="script.js"></script>
 
 
 
 <!-- =====================================================
      SERVICE WORKER
-===================================================== -->
+====================================================== -->
 
 <script>
 
 if ("serviceWorker" in navigator) {
 
-    window.addEventListener(
-        "load",
-        function() {
+    window.addEventListener("load", function () {
 
-            navigator.serviceWorker
-                .register(
-                    "/service-worker.js"
-                )
-                .then(
-                    function() {
+        navigator.serviceWorker
+            .register("/service-worker.js")
+            .then(function () {
 
-                        console.log(
-                            "Rashidson AI service worker registered"
-                        );
-
-                    }
-                )
-                .catch(
-                    function(error) {
-
-                        console.error(
-                            "Service worker registration failed:",
-                            error
-                        );
-
-                    }
+                console.log(
+                    "Rashidson AI service worker registered."
                 );
 
-        }
-    );
+            })
+            .catch(function (error) {
+
+                console.error(
+                    "Service worker registration failed:",
+                    error
+                );
+
+            });
+
+    });
 
 }
 
@@ -1690,5 +404,4 @@ if ("serviceWorker" in navigator) {
 
 
 </body>
-
 </html>
