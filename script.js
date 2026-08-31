@@ -1,92 +1,124 @@
 const chat = document.getElementById("chat");
 const messageInput = document.getElementById("messageInput");
 const sendButton = document.getElementById("sendButton");
+
 const micButton = document.getElementById("micButton");
+const callButton = document.getElementById("callButton");
 
-/* =========================
-   RASHIDSON AI VOICE OUTPUT
-========================= */
+const voiceScreen = document.getElementById("voiceScreen");
+const voiceMicButton = document.getElementById("voiceMicButton");
+const voiceEndButton = document.getElementById("voiceEndButton");
+const voiceTextButton = document.getElementById("voiceTextButton");
 
-function speak(text, onEnd = null) {
-
-    if (!("speechSynthesis" in window)) {
-        console.log("Speech synthesis is not supported.");
-        if (onEnd) onEnd();
-        return;
-    }
-
-    window.speechSynthesis.cancel();
-
-    const voice = new SpeechSynthesisUtterance(text);
-
-    voice.rate = 1;
-    voice.pitch = 1;
-    voice.volume = 1;
-    voice.lang = "en-US";
-
-    voice.onend = function () {
-        if (onEnd) onEnd();
-    };
-
-    voice.onerror = function () {
-        if (onEnd) onEnd();
-    };
-
-    window.speechSynthesis.speak(voice);
-}
+const voiceStatus = document.getElementById("voiceStatus");
+const voiceSubtitle = document.getElementById("voiceSubtitle");
 
 
-/* =========================
-   SPEECH RECOGNITION
-========================= */
+/* =====================================================
+   VOICE RECOGNITION
+===================================================== */
 
 const SpeechRecognition =
     window.SpeechRecognition ||
     window.webkitSpeechRecognition;
 
 let recognition = null;
+
 let isListening = false;
-let voiceConversation = false;
-let recognitionStarting = false;
+let voiceMode = false;
+let processingVoice = false;
+
+
+/* =====================================================
+   CREATE SPEECH RECOGNITION
+===================================================== */
 
 if (SpeechRecognition) {
 
     recognition = new SpeechRecognition();
 
-    recognition.continuous = false;
-    recognition.interimResults = false;
     recognition.lang = "en-US";
+
+    recognition.continuous = false;
+
+    recognition.interimResults = true;
+
+    recognition.maxAlternatives = 1;
+
 
     recognition.onstart = function () {
 
         isListening = true;
-        recognitionStarting = false;
 
-        if (micButton) {
-            micButton.textContent = "🔴";
-            micButton.title = "Stop listening";
-        }
+        updateVoiceInterface(
+            "Listening...",
+            "I'm listening to you"
+        );
 
-        messageInput.placeholder =
-            "Listening...";
     };
 
 
     recognition.onresult = function (event) {
 
-        const spokenText =
-            event.results[0][0].transcript.trim();
+        let finalText = "";
+        let interimText = "";
 
-        if (!spokenText) {
-            return;
+        for (
+            let i = event.resultIndex;
+            i < event.results.length;
+            i++
+        ) {
+
+            const transcript =
+                event.results[i][0].transcript;
+
+            if (event.results[i].isFinal) {
+
+                finalText += transcript;
+
+            } else {
+
+                interimText += transcript;
+
+            }
+
         }
 
-        messageInput.value = spokenText;
 
-        /*
-         * Send the spoken message automatically.
-         */
-        sendMessage();
+        if (voiceMode) {
+
+            voiceSubtitle.textContent =
+                interimText ||
+                finalText ||
+                "I'm listening to you";
+
+        } else {
+
+            messageInput.value =
+                interimText || finalText;
+
+        }
+
+
+        if (finalText.trim()) {
+
+            if (voiceMode) {
+
+                processVoiceMessage(
+                    finalText.trim()
+                );
+
+            } else {
+
+                messageInput.value =
+                    finalText.trim();
+
+                sendMessage();
+
+            }
+
+        }
+
     };
 
 
@@ -97,262 +129,150 @@ if (SpeechRecognition) {
             event.error
         );
 
-        recognitionStarting = false;
+        isListening = false;
 
-        if (event.error === "not-allowed") {
 
-            addMessage(
-                "ai",
-                "Microphone permission was blocked. Please allow microphone access in your browser and try again."
-            );
+        if (voiceMode) {
 
-            voiceConversation = false;
-        }
+            if (event.error === "not-allowed") {
 
-        else if (event.error === "no-speech") {
+                updateVoiceInterface(
+                    "Microphone blocked",
+                    "Allow microphone permission in your browser"
+                );
 
-            if (voiceConversation) {
-                setTimeout(startListening, 500);
+            } else if (event.error === "no-speech") {
+
+                updateVoiceInterface(
+                    "Ready",
+                    "Tap the microphone to speak"
+                );
+
+            } else {
+
+                updateVoiceInterface(
+                    "Microphone error",
+                    "Please try again"
+                );
+
             }
+
         }
 
-        else if (event.error === "audio-capture") {
-
-            addMessage(
-                "ai",
-                "I couldn't access the microphone. Please check that your microphone is connected and available."
-            );
-
-            voiceConversation = false;
-        }
     };
 
 
     recognition.onend = function () {
 
         isListening = false;
-        recognitionStarting = false;
-
-        if (micButton) {
-
-            micButton.textContent =
-                voiceConversation ? "🛑" : "🎤";
-
-            micButton.title =
-                voiceConversation
-                    ? "Stop voice conversation"
-                    : "Speak to Rashidson AI";
-        }
-
-        messageInput.placeholder =
-            "Message Rashidson AI...";
 
         /*
-         * In voice-conversation mode,
-         * listening can start again after
-         * Rashidson finishes speaking.
+         * In voice conversation mode,
+         * we don't immediately restart here.
+         * We restart after Rashidson AI finishes speaking.
          */
-    };
 
-} else {
-
-    console.log(
-        "Speech recognition is not supported in this browser."
-    );
-}
-
-
-/* =========================
-   START MICROPHONE
-========================= */
-
-function startListening() {
-
-    if (!recognition) {
-
-        addMessage(
-            "ai",
-            "Voice input is not supported by this browser. Please use Microsoft Edge or Google Chrome."
-        );
-
-        return;
-    }
-
-    if (isListening || recognitionStarting) {
-        return;
-    }
-
-    try {
-
-        recognitionStarting = true;
-        recognition.start();
-
-    } catch (error) {
-
-        recognitionStarting = false;
-
-        console.error(
-            "Could not start microphone:",
-            error
-        );
-    }
-}
-
-
-/* =========================
-   STOP MICROPHONE
-========================= */
-
-function stopListening() {
-
-    if (recognition && isListening) {
-
-        recognition.stop();
-    }
-
-    isListening = false;
-    recognitionStarting = false;
-}
-
-
-/* =========================
-   MICROPHONE BUTTON
-========================= */
-
-if (micButton) {
-
-    micButton.addEventListener(
-        "click",
-        function () {
-
-            /*
-             * If already listening,
-             * stop everything.
-             */
-            if (isListening) {
-
-                voiceConversation = false;
-
-                stopListening();
-
-                window.speechSynthesis.cancel();
-
-                micButton.textContent = "🎤";
-                micButton.title =
-                    "Speak to Rashidson AI";
-
-                return;
-            }
-
-
-            /*
-             * Start normal one-message
-             * voice input.
-             */
-            voiceConversation = false;
-
-            startListening();
-        }
-    );
-}
-
-
-/* =========================
-   VOICE CONVERSATION BUTTON
-========================= */
-
-/*
- * We will create this button from JavaScript
- * so you don't have to change your HTML again.
- */
-
-const callButton =
-    document.createElement("button");
-
-callButton.id = "callButton";
-callButton.type = "button";
-callButton.textContent = "📞";
-callButton.title =
-    "Start voice conversation";
-
-
-/*
- * Put the call button beside
- * the microphone button.
- */
-
-if (micButton) {
-
-    micButton.parentNode.insertBefore(
-        callButton,
-        micButton
-    );
-}
-
-
-/* =========================
-   VOICE CONVERSATION
-========================= */
-
-callButton.addEventListener(
-    "click",
-    function () {
-
-        if (!recognition) {
-
-            addMessage(
-                "ai",
-                "Voice conversation is not supported by this browser. Please use Microsoft Edge or Google Chrome."
-            );
-
-            return;
-        }
-
-
-        /*
-         * STOP VOICE CONVERSATION
-         */
-        if (voiceConversation) {
-
-            voiceConversation = false;
-
-            stopListening();
-
-            window.speechSynthesis.cancel();
-
-            callButton.textContent = "📞";
-            callButton.title =
-                "Start voice conversation";
+        if (!voiceMode && !processingVoice) {
 
             micButton.textContent = "🎤";
-            micButton.title =
-                "Speak to Rashidson AI";
 
-            messageInput.placeholder =
-                "Message Rashidson AI...";
-
-            return;
         }
 
+    };
 
-        /*
-         * START VOICE CONVERSATION
-         */
+}
 
-        voiceConversation = true;
 
-        callButton.textContent = "🛑";
-        callButton.title =
-            "Stop voice conversation";
+/* =====================================================
+   TEXT TO SPEECH
+===================================================== */
 
-        startListening();
+function speak(text, continueListening = false) {
+
+    if (!("speechSynthesis" in window)) {
+
+        if (continueListening) {
+            startVoiceListening();
+        }
+
+        return;
+
     }
-);
 
 
-/* =========================
+    window.speechSynthesis.cancel();
+
+
+    const cleanText =
+        text
+            .replace(/```[\s\S]*?```/g, "code omitted")
+            .replace(/[*#_`]/g, "")
+            .replace(/\n+/g, ". ");
+
+
+    const voice =
+        new SpeechSynthesisUtterance(cleanText);
+
+
+    voice.rate = 1;
+
+    voice.pitch = 1;
+
+    voice.volume = 1;
+
+
+    voice.onstart = function () {
+
+        if (voiceMode) {
+
+            updateVoiceInterface(
+                "Rashidson AI is speaking",
+                "Listen to Rashidson AI"
+            );
+
+        }
+
+    };
+
+
+    voice.onend = function () {
+
+        if (voiceMode && continueListening) {
+
+            setTimeout(() => {
+
+                if (voiceMode) {
+
+                    startVoiceListening();
+
+                }
+
+            }, 300);
+
+        }
+
+    };
+
+
+    voice.onerror = function () {
+
+        if (voiceMode && continueListening) {
+
+            startVoiceListening();
+
+        }
+
+    };
+
+
+    window.speechSynthesis.speak(voice);
+
+}
+
+
+/* =====================================================
    ESCAPE HTML
-========================= */
+===================================================== */
 
 function escapeHTML(text) {
 
@@ -362,20 +282,26 @@ function escapeHTML(text) {
     div.textContent = text;
 
     return div.innerHTML;
+
 }
 
 
-/* =========================
+/* =====================================================
    FORMAT AI RESPONSE
-========================= */
+===================================================== */
 
 function formatResponse(text) {
 
     const codeBlocks = [];
 
+
     text = text.replace(
         /```(\w+)?\n?([\s\S]*?)```/g,
-        function(match, language, code) {
+        function (
+            match,
+            language,
+            code
+        ) {
 
             const id =
                 "code-" +
@@ -383,18 +309,32 @@ function formatResponse(text) {
                 "-" +
                 codeBlocks.length;
 
+
             codeBlocks.push({
+
                 id: id,
+
                 code: code.trim(),
-                language: language || "code"
+
+                language:
+                    language || "code"
+
             });
 
-            return `___CODE_BLOCK_${codeBlocks.length - 1}___`;
+
+            return (
+                "___CODE_BLOCK_" +
+                codeBlocks.length +
+                "___"
+            );
+
         }
     );
 
+
     let formatted =
         escapeHTML(text);
+
 
     formatted =
         formatted.replace(
@@ -402,13 +342,18 @@ function formatResponse(text) {
             "<br>"
         );
 
+
     codeBlocks.forEach(
-        (block, index) => {
+        function (block, index) {
 
             const safeCode =
-                escapeHTML(block.code);
+                escapeHTML(
+                    block.code
+                );
+
 
             const codeHTML = `
+
                 <div class="code-box">
 
                     <div class="code-header">
@@ -426,31 +371,41 @@ function formatResponse(text) {
 
                     </div>
 
-                    <pre id="${block.id}"><code>${safeCode}</code></pre>
+                    <pre id="${block.id}">
+<code>${safeCode}</code>
+</pre>
 
                 </div>
+
             `;
+
 
             formatted =
                 formatted.replace(
-                    `___CODE_BLOCK_${index}___`,
+                    "___CODE_BLOCK_" +
+                    (index + 1) +
+                    "___",
                     codeHTML
                 );
+
         }
     );
 
+
     return formatted;
+
 }
 
 
-/* =========================
+/* =====================================================
    ADD MESSAGE
-========================= */
+===================================================== */
 
 function addMessage(type, text) {
 
     const message =
         document.createElement("div");
+
 
     message.className =
         `message ${type}`;
@@ -458,6 +413,7 @@ function addMessage(type, text) {
 
     const avatar =
         document.createElement("div");
+
 
     avatar.className =
         "avatar";
@@ -469,19 +425,25 @@ function addMessage(type, text) {
 
     if (type === "ai") {
 
-        img.src = "icon.png";
-        img.alt = "Rashidson AI";
+        img.src =
+            "icon.png";
+
+        img.alt =
+            "Rashidson AI";
 
         avatar.appendChild(img);
 
     } else {
 
-        avatar.innerHTML = "👤";
+        avatar.innerHTML =
+            "👤";
+
     }
 
 
     const content =
         document.createElement("div");
+
 
     content.className =
         "message-content";
@@ -489,6 +451,7 @@ function addMessage(type, text) {
 
     const name =
         document.createElement("strong");
+
 
     name.textContent =
         type === "ai"
@@ -509,24 +472,26 @@ function addMessage(type, text) {
 
         paragraph.textContent =
             text;
+
     }
 
 
     content.appendChild(name);
+
     content.appendChild(paragraph);
 
     message.appendChild(avatar);
+
     message.appendChild(content);
 
     chat.appendChild(message);
+
 
     chat.scrollTop =
         chat.scrollHeight;
 
 
-    /*
-     * Copy code buttons
-     */
+    /* COPY CODE BUTTONS */
 
     message
         .querySelectorAll(".copy-code")
@@ -539,21 +504,27 @@ function addMessage(type, text) {
                     const codeId =
                         button.dataset.codeId;
 
+
                     const codeElement =
                         document.getElementById(
                             codeId
                         );
 
+
                     const code =
                         codeElement.innerText;
 
+
                     try {
 
-                        await navigator.clipboard
-                            .writeText(code);
+                        await navigator.clipboard.writeText(
+                            code
+                        );
+
 
                         button.textContent =
                             "Copied ✓";
+
 
                         setTimeout(() => {
 
@@ -562,25 +533,30 @@ function addMessage(type, text) {
 
                         }, 1500);
 
+
                     } catch (error) {
 
                         console.error(
                             "Copy failed:",
                             error
                         );
+
                     }
+
                 }
             );
+
         });
 
 
     return message;
+
 }
 
 
-/* =========================
-   SEND MESSAGE
-========================= */
+/* =====================================================
+   SEND NORMAL TEXT MESSAGE
+===================================================== */
 
 async function sendMessage() {
 
@@ -589,7 +565,9 @@ async function sendMessage() {
 
 
     if (!message) {
+
         return;
+
     }
 
 
@@ -599,11 +577,16 @@ async function sendMessage() {
     );
 
 
-    messageInput.value = "";
+    messageInput.value =
+        "";
 
 
-    sendButton.disabled = true;
-    sendButton.style.opacity = "0.6";
+    sendButton.disabled =
+        true;
+
+
+    sendButton.style.opacity =
+        "0.6";
 
 
     try {
@@ -612,16 +595,23 @@ async function sendMessage() {
             await fetch(
                 "/api/chat",
                 {
+
                     method: "POST",
 
                     headers: {
+
                         "Content-Type":
                             "application/json"
+
                     },
 
                     body: JSON.stringify({
-                        message: message
+
+                        message:
+                            message
+
                     })
+
                 }
             );
 
@@ -636,6 +626,7 @@ async function sendMessage() {
                 data.error ||
                 "AI request failed"
             );
+
         }
 
 
@@ -650,35 +641,7 @@ async function sendMessage() {
         );
 
 
-        /*
-         * Normal chat:
-         * Rashidson speaks once.
-         *
-         * Voice conversation:
-         * Rashidson speaks, then
-         * listens again.
-         */
-
-        if (voiceConversation) {
-
-            speak(
-                reply,
-                function () {
-
-                    if (voiceConversation) {
-
-                        setTimeout(
-                            startListening,
-                            400
-                        );
-                    }
-                }
-            );
-
-        } else {
-
-            speak(reply);
-        }
+        speak(reply);
 
 
     } catch (error) {
@@ -699,71 +662,550 @@ async function sendMessage() {
         );
 
 
-        if (voiceConversation) {
-
-            speak(
-                errorMessage,
-                function () {
-
-                    if (voiceConversation) {
-
-                        setTimeout(
-                            startListening,
-                            400
-                        );
-                    }
-                }
-            );
-
-        } else {
-
-            speak(errorMessage);
-        }
+        speak(
+            errorMessage
+        );
 
 
     } finally {
 
-        sendButton.disabled = false;
-        sendButton.style.opacity = "1";
+        sendButton.disabled =
+            false;
 
-        /*
-         * Don't focus the keyboard while
-         * voice conversation is active.
-         */
 
-        if (!voiceConversation) {
-            messageInput.focus();
-        }
+        sendButton.style.opacity =
+            "1";
+
+
+        messageInput.focus();
+
     }
+
 }
 
 
-/* =========================
-   SEND BUTTON
-========================= */
+/* =====================================================
+   START MICROPHONE
+===================================================== */
 
-sendButton.addEventListener(
-    "click",
-    sendMessage
-);
+function startMicrophone() {
 
+    if (!recognition) {
 
-/* =========================
-   ENTER KEY
-========================= */
+        alert(
+            "Voice recognition is not supported by this browser. Please try Chrome or Edge."
+        );
 
-messageInput.addEventListener(
-    "keydown",
-    function(event) {
+        return;
 
-        if (
-            event.key === "Enter" &&
-            !event.shiftKey
-        ) {
-
-            event.preventDefault();
-
-            sendMessage();
-        }
     }
-);
+
+
+    if (isListening) {
+
+        recognition.stop();
+
+        return;
+
+    }
+
+
+    try {
+
+        recognition.start();
+
+    } catch (error) {
+
+        console.error(
+            "Could not start microphone:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   NORMAL MIC BUTTON
+===================================================== */
+
+if (micButton) {
+
+    micButton.addEventListener(
+        "click",
+        function () {
+
+            voiceMode = false;
+
+            startMicrophone();
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   OPEN FULL VOICE MODE
+===================================================== */
+
+function openVoiceMode() {
+
+    if (!voiceScreen) {
+
+        return;
+
+    }
+
+
+    voiceMode = true;
+
+    processingVoice = false;
+
+
+    voiceScreen.classList.add(
+        "active"
+    );
+
+
+    updateVoiceInterface(
+        "Ready",
+        "Tap the microphone to speak"
+    );
+
+}
+
+
+/* =====================================================
+   CALL BUTTON
+===================================================== */
+
+if (callButton) {
+
+    callButton.addEventListener(
+        "click",
+        function () {
+
+            openVoiceMode();
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   VOICE MICROPHONE BUTTON
+===================================================== */
+
+if (voiceMicButton) {
+
+    voiceMicButton.addEventListener(
+        "click",
+        function () {
+
+            if (!voiceMode) {
+
+                return;
+
+            }
+
+
+            if (isListening) {
+
+                recognition.stop();
+
+            } else {
+
+                startVoiceListening();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   START VOICE LISTENING
+===================================================== */
+
+function startVoiceListening() {
+
+    if (!recognition) {
+
+        updateVoiceInterface(
+            "Microphone unavailable",
+            "Try Chrome or Edge and allow microphone access"
+        );
+
+        return;
+
+    }
+
+
+    if (isListening) {
+
+        return;
+
+    }
+
+
+    if (processingVoice) {
+
+        return;
+
+    }
+
+
+    try {
+
+        recognition.start();
+
+    } catch (error) {
+
+        console.error(
+            "Voice start error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   PROCESS VOICE MESSAGE
+===================================================== */
+
+async function processVoiceMessage(message) {
+
+    if (!message || processingVoice) {
+
+        return;
+
+    }
+
+
+    processingVoice = true;
+
+
+    if (recognition && isListening) {
+
+        try {
+
+            recognition.stop();
+
+        } catch (error) {}
+
+    }
+
+
+    updateVoiceInterface(
+        "Thinking...",
+        "Rashidson AI is preparing a response"
+    );
+
+
+    /*
+     * Also place the conversation
+     * in the normal chat history.
+     */
+
+    addMessage(
+        "user",
+        message
+    );
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/chat",
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body: JSON.stringify({
+
+                        message:
+                            message
+
+                    })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "AI request failed"
+            );
+
+        }
+
+
+        const reply =
+            data.reply ||
+            "Sorry, I couldn't generate a response.";
+
+
+        addMessage(
+            "ai",
+            reply
+        );
+
+
+        processingVoice =
+            false;
+
+
+        /*
+         * Speak to the user.
+         *
+         * When Rashidson finishes speaking,
+         * microphone listening starts again.
+         */
+
+        speak(
+            reply,
+            true
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Voice AI error:",
+            error
+        );
+
+
+        const errorMessage =
+            "Sorry, I couldn't connect to Rashidson AI right now.";
+
+
+        addMessage(
+            "ai",
+            errorMessage
+        );
+
+
+        processingVoice =
+            false;
+
+
+        speak(
+            errorMessage,
+            true
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   UPDATE VOICE SCREEN
+===================================================== */
+
+function updateVoiceInterface(
+    status,
+    subtitle
+) {
+
+    if (voiceStatus) {
+
+        voiceStatus.textContent =
+            status;
+
+    }
+
+
+    if (voiceSubtitle) {
+
+        voiceSubtitle.textContent =
+            subtitle;
+
+    }
+
+
+    if (voiceMicButton) {
+
+        if (status === "Listening...") {
+
+            voiceMicButton.textContent =
+                "⏹️";
+
+        } else {
+
+            voiceMicButton.textContent =
+                "🎙️";
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   END VOICE MODE
+===================================================== */
+
+function closeVoiceMode() {
+
+    voiceMode = false;
+
+    processingVoice = false;
+
+
+    if (recognition) {
+
+        try {
+
+            recognition.stop();
+
+        } catch (error) {}
+
+    }
+
+
+    if ("speechSynthesis" in window) {
+
+        window.speechSynthesis.cancel();
+
+    }
+
+
+    isListening = false;
+
+
+    if (voiceScreen) {
+
+        voiceScreen.classList.remove(
+            "active"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   END BUTTON
+===================================================== */
+
+if (voiceEndButton) {
+
+    voiceEndButton.addEventListener(
+        "click",
+        closeVoiceMode
+    );
+
+}
+
+
+/* =====================================================
+   "ASK RASHIDSON AI" BUTTON
+===================================================== */
+
+if (voiceTextButton) {
+
+    voiceTextButton.addEventListener(
+        "click",
+        function () {
+
+            closeVoiceMode();
+
+            setTimeout(() => {
+
+                messageInput.focus();
+
+            }, 100);
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   SEND BUTTON
+===================================================== */
+
+if (sendButton) {
+
+    sendButton.addEventListener(
+        "click",
+        sendMessage
+    );
+
+}
+
+
+/* =====================================================
+   ENTER KEY
+===================================================== */
+
+if (messageInput) {
+
+    messageInput.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key === "Enter" &&
+                !event.shiftKey
+            ) {
+
+                event.preventDefault();
+
+                sendMessage();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   BROWSER SUPPORT MESSAGE
+===================================================== */
+
+if (!recognition) {
+
+    console.warn(
+        "Speech Recognition is not supported in this browser."
+    );
+
+}
+
+
+/* =====================================================
+   INITIAL FOCUS
+===================================================== */
+
+if (messageInput) {
+
+    messageInput.focus();
+
+}
