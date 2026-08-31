@@ -351,10 +351,10 @@ async function sendMessage(customMessage = null) {
 
     try {
 
-        const response =
-            await fetch(
-                "/api/chat",
-                {
+     const response =
+    await fetch(
+        "luseed-assistant-URL/api/chat",
+        {
 
                     method: "POST",
 
