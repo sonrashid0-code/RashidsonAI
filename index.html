@@ -1,5 +1,6 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,40 +11,48 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#151d33">
     <link rel="stylesheet" href="style.css?v=99">
-     <style>
-      /* FORCE SMALL LOGO - 38px */
-      .logo{
-        width:38px !important;
-        height:38px !important;
-        min-width:38px !important;
-        min-height:38px !important;
-        max-width:38px !important;
-        max-height:38px !important;
-        border-radius:10px !important;
-        overflow:hidden !important;
-      }
-      .logo img{
-        width:100% !important;
-        height:100% !important;
-        object-fit:contain !important;
-      }
-      .top-bar{
-        height:60px !important;
-        min-height:60px !important;
-      }
+
+    <style>
+        /* FORCE SMALL LOGO - 38px */
+        .logo {
+            width: 38px !important;
+            height: 38px !important;
+            min-width: 38px !important;
+            min-height: 38px !important;
+            max-width: 38px !important;
+            max-height: 38px !important;
+            border-radius: 10px !important;
+            overflow: hidden !important;
+        }
+
+        .logo img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+        }
+
+        .top-bar {
+            height: 60px !important;
+            min-height: 60px !important;
+        }
     </style>
+
 </head>
 
 <body>
 
 <div class="app">
 
+    <!-- TOP BAR -->
     <header class="top-bar">
 
         <div class="brand">
 
-            <div class="logo"style="width:38px;min-width:38px;">
-                <img src="icon.png" alt="RSai"style="width:100%;height:100%;object-fit:contain;">
+            <div class="logo">
+                <img
+                    src="icon.png"
+                    alt="RSai"
+                >
             </div>
 
             <div>
@@ -61,6 +70,7 @@
     </header>
 
 
+    <!-- CHAT -->
     <main id="chat" class="chat">
 
         <div class="welcome">
@@ -79,6 +89,7 @@
         </div>
 
 
+        <!-- FIRST AI MESSAGE -->
         <div class="message ai">
 
             <div class="avatar">
@@ -99,50 +110,78 @@
         </div>
 
     </main>
-   <div class="input-area">
 
-    <input
-        id="messageInput"
-        type="text"
-        placeholder="Message Rashidson AI..."
-        autocomplete="off"
-    >
 
-    <button id="micButton" type="button" title="Speak to Rashidson AI">
-        🎤
-    </button>
+    <!-- INPUT AREA -->
+    <div class="input-area">
 
-    <button id="sendButton" type="button">
-        ➤
-    </button>
+        <input
+            id="messageInput"
+            type="text"
+            placeholder="Message Rashidson AI..."
+            autocomplete="off"
+        >
 
-</div>
- <div class="footer">
+        <!-- MICROPHONE -->
+        <button
+            id="micButton"
+            type="button"
+            title="Speak to Rashidson AI"
+        >
+            🎤
+        </button>
+
+        <!-- SEND -->
+        <button
+            id="sendButton"
+            type="button"
+            title="Send message"
+        >
+            ➤
+        </button>
+
+    </div>
+
+
+    <!-- FOOTER -->
+    <div class="footer">
         Rashidson AI can make mistakes. Check important information.
     </div>
 
 </div>
 
 
-<script src="script.js"></script><script src="script.js"></script>
+<!-- JAVASCRIPT -->
+<script src="script.js"></script>
 
+
+<!-- SERVICE WORKER -->
 <script>
 if ("serviceWorker" in navigator) {
+
     window.addEventListener("load", () => {
+
         navigator.serviceWorker.register("/service-worker.js")
             .then(() => {
-                console.log("Rashidson AI service worker registered");
+
+                console.log(
+                    "Rashidson AI service worker registered"
+                );
+
             })
             .catch(error => {
-                console.error("Service worker registration failed:", error);
+
+                console.error(
+                    "Service worker registration failed:",
+                    error
+                );
+
             });
+
     });
+
 }
 </script>
-
-</body>
-</html>
-
 
 </body>
 </html>
